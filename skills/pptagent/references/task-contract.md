@@ -45,6 +45,7 @@ an earlier PPTX has already been built.
 
 For this fork, `init` defaults to `profile: paper` and eight slides. Read
 [paper-presentation.md](paper-presentation.md) and provide `paper-plan.json`.
-The plan is part of the render/build input snapshot; changing it invalidates
-old evidence. `audit-paper` checks an actual PPTX independently of rendering.
+Authored plan content is part of the render/build input snapshot; changing it
+invalidates old evidence. Artifact-bound reader-review metadata is excluded
+from that source hash and is checked against the final PPTX separately. `audit-paper` checks an actual PPTX independently of rendering.
 General legacy tasks without `profile` retain their existing behavior.

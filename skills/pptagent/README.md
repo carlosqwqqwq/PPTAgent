@@ -457,9 +457,12 @@ Existing tasks created with the earlier standalone scripts need fresh renders, r
 
 ## Academic paper defaults in this fork
 
-New tasks use an eight-page paper profile with a ten-page budget. Read the
-[paper presentation contract](references/paper-presentation.md) for template,
-section-title order, revision density, compact experimental panels, and footer
-rules. The supplied institutional template stays private. `audit-paper` checks
-the exported PPTX against a source-linked plan before delivery. Existing tasks
-without a profile retain their general workflow; `--profile general` opts out.
+New tasks use a reader-centered paper profile with an eight-to-ten-slide
+planning target. Read the [paper presentation contract](references/paper-presentation.md)
+for background and motivation, synthesis, key-topic coverage, flexible layouts,
+readable evidence, white backgrounds, and private template handling.
+`audit-paper` verifies actual PPTX text and reports quantitative observations;
+it does not judge comprehension or require literal chapter headings.
+Record a first-time-reader review of the final artifact before delivery.
+Existing tasks without a profile retain their general workflow;
+`--profile general` opts out.

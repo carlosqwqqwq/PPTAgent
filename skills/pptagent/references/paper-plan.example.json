@@ -1,17 +1,29 @@
 {
-  "revision": true,
-  "template_used": "Private institutional template, retained in the task workspace",
-  "baseline_source": "Previous delivered PPTX; explanatory body text only",
+  "template_used": "Private institutional template retained in the task workspace",
   "max_slides": 10,
-  "experiment_page_budget": 2,
-  "experiment_layout_reason": "Related plots share compact panels with readable axes and legends.",
-  "sections": [
-    {"id": "1", "title": "Introduction", "display_title": "1 引言"},
-    {"id": "2", "title": "Method", "display_title": "2 方法", "title_variants": ["2 方法（续）"]}
+  "narrative_order": ["background", "motivation", "method", "evaluation", "discussion"],
+  "key_topics": [
+    {"id": "problem", "label": "Objects, task, and the problem being solved", "source_sections": ["1", "2"]},
+    {"id": "motivation", "label": "Why existing methods leave a gap", "source_sections": ["3"]}
   ],
   "slides": [
-    {"title": "Paper title", "section_ids": [], "kind": "cover", "body": [], "density_exception": "Cover contains bibliographic information."},
-    {"title": "1 引言", "section_ids": ["1"], "kind": "content", "body": ["The concrete problem, assumptions, and contribution."], "baseline_body_units": 5, "baseline_mapping": "Previous slide 2 body; same source section", "experimental": false, "figure_ids": []},
-    {"title": "2 方法", "section_ids": ["2"], "kind": "text-only", "body": ["A short source section without a figure."], "baseline_body_units": 7, "baseline_mapping": "Previous slide 3", "density_exception": "Short text-only section; no evidence added solely to fill space.", "experimental": false, "figure_ids": []}
-  ]
+    {
+      "title": "Why the system is difficult to validate",
+      "narrative_stage": "background",
+      "topic_ids": ["problem", "motivation"],
+      "layout": "explanation above a full-width annotated source figure",
+      "body": ["Define the system, the task, and the concrete failure illustrated below."],
+      "figure_ids": ["motivation-figure-used-early"],
+      "experimental": false
+    }
+  ],
+  "reader_review": {
+    "artifact_sha256": "Replace with the final PPTX SHA256 after the actual reader review",
+    "reviewer": "Describe the first-time-reader review",
+    "findings": [
+      {"slide": 1, "problem": "The central object was not defined before the mechanism.", "change": "Added the definition and an annotated example before the method."}
+    ],
+    "coverage_notes": "Describe checks of background, motivation, definitions, transitions, core method, evidence, and limitations.",
+    "remaining_issues": []
+  }
 }

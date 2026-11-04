@@ -58,13 +58,13 @@ class PaperTests(unittest.TestCase):
         core.scaffold(self.workspace)
         html = (self.workspace / "slides/slide01.html").read_text()
         self.assertIn("#ffffff", html)
-        self.assertIn("numbered paper section", html)
+        self.assertIn("explanatory page title", html)
         self.assertNotIn("SLIDE 01", html)
 
-    def test_paper_page_budget_rejects_eleven(self) -> None:
+    def test_paper_page_count_is_a_planning_target(self) -> None:
         args = cli.make_parser().parse_args(["init", "--workspace", str(self.workspace), "--slides", "11"])
-        with self.assertRaisesRegex(ValueError, "ten-slide"):
-            cli.init_workspace(args)
+        self.assertTrue(cli.init_workspace(args)["ok"])
+
 
     def test_cjk_and_latin_measurement(self) -> None:
         self.assertEqual(paper.text_units("方法 MCMC 1.5 倍"), 5)
@@ -83,18 +83,24 @@ class PaperTests(unittest.TestCase):
         self.assertTrue(any("title" in issue for issue in report["issues"]))
         self.assertTrue(any("body text" in issue for issue in report["issues"]))
 
-    def test_sparse_body_fails(self) -> None:
+    def test_density_has_no_acceptance_threshold(self) -> None:
         self.make_pptx()
         self.plan["slides"][0]["baseline_body_units"] = 8
-        self.assertFalse(self.audit()["ok"])
+        report = self.audit()
+        self.assertTrue(report["ok"])
+        self.assertEqual(report["measurements"][0]["density_ratio"], 1.0)
+        self.assertNotIn("density_target_met", report["measurements"][0])
 
-    def test_text_only_exception_is_explicit(self) -> None:
+
+    def test_baseline_and_density_exception_are_optional(self) -> None:
         self.make_pptx()
         entry = self.plan["slides"][0]
-        entry.update(kind="text-only", baseline_body_units=8, density_exception="Short source section without a figure")
+        entry.pop("baseline_body_units")
+        entry.pop("baseline_mapping")
+        self.plan.pop("baseline_source")
+        entry.update(kind="text-only")
         self.assertTrue(self.audit()["ok"])
-        entry["figure_ids"] = ["fig1"]
-        self.assertFalse(self.audit()["ok"])
+
 
     def test_lower_left_source_label_fails(self) -> None:
         for label in ("Fig. 1 · p. 4", "图 3", "p6", "2"):
@@ -102,19 +108,22 @@ class PaperTests(unittest.TestCase):
                 self.make_pptx(extra=label)
                 self.assertTrue(any("lower-left" in issue for issue in self.audit()["issues"]))
 
-    def test_unrelated_title_fails(self) -> None:
-        self.make_pptx(title="A new perspective")
-        self.plan["slides"][0]["title"] = "A new perspective"
-        self.assertTrue(any("recorded paper heading" in issue for issue in self.audit()["issues"]))
+    def test_synthesized_title_needs_no_literal_section_mapping(self) -> None:
+        title = "Why simulator state is hard to validate"
+        self.make_pptx(title=title)
+        self.plan["slides"][0]["title"] = title
+        self.assertTrue(self.audit()["ok"])
 
-    def test_missing_section_and_experiment_budget_fail(self) -> None:
+
+    def test_section_omission_and_experiment_budget_do_not_block(self) -> None:
         self.make_pptx()
         self.plan["sections"].append({"id": "2", "title": "2 Method"})
         self.plan["slides"][0]["experimental"] = True
         self.plan["experiment_page_budget"] = 0
         report = self.audit()
-        self.assertTrue(any("missing" in issue for issue in report["issues"]))
-        self.assertTrue(any("Experimental" in issue for issue in report["issues"]))
+        self.assertTrue(report["ok"])
+        self.assertTrue(any("Experimental" in warning for warning in report["warnings"]))
+
 
     def test_plan_change_invalidates_input_snapshot(self) -> None:
         self.test_default_init_is_eight_page_paper_profile()
@@ -153,14 +162,16 @@ class PaperTests(unittest.TestCase):
         self.plan["slides"][0]["baseline_body_units"] = 8
         self.assertFalse(self.audit()["ok"])
 
-    def test_content_exception_preserves_unmet_measurement(self) -> None:
+    def test_key_topic_coverage_is_declared_not_inferred(self) -> None:
         self.make_pptx()
-        self.plan["slides"][0].update(baseline_body_units=8, density_exception="Regrouped source material cannot be expanded without repetition.")
+        self.plan["key_topics"] = [{"id": "background", "label": "Problem setting"}]
         report = self.audit()
         self.assertTrue(report["ok"])
-        self.assertFalse(report["measurements"][0]["density_target_met"])
-        self.assertEqual(report["measurements"][0]["density_ratio"], 1.0)
-        self.assertTrue(report["exceptions"])
+        self.assertEqual(report["coverage"]["unmapped_topic_ids"], ["background"])
+        self.assertFalse(report["coverage"]["verified_semantically"])
+        self.plan["slides"][0]["topic_ids"] = ["background"]
+        self.assertEqual(self.audit()["coverage"]["unmapped_topic_ids"], [])
+
 
     def test_continuation_title_is_allowed(self) -> None:
         title = "1 Introduction (continued)"
@@ -169,25 +180,23 @@ class PaperTests(unittest.TestCase):
         self.plan["slides"][0]["title"] = title
         self.assertTrue(self.audit()["ok"])
 
-    def test_experiment_exception_is_visible(self) -> None:
+    def test_later_source_figure_can_appear_early(self) -> None:
         self.make_pptx()
-        self.plan["slides"][0]["experimental"] = True
-        self.plan.update(experiment_page_budget=0, experiment_layout_reason="Readable panels", experiment_budget_exception="Retain necessary axes and legends at full size.")
-        report = self.audit()
-        self.assertTrue(report["ok"])
-        self.assertEqual(report["exceptions"][0]["check"], "experiment_page_budget")
+        self.plan["sections"] += [{"id": "2", "title": "Background"}, {"id": "3", "title": "Motivation"}]
+        self.plan["slides"][0].update(section_ids=["1", "3"], figure_ids=["fig1"])
+        self.assertTrue(self.audit()["ok"])
 
-    def test_page_budget_exception_is_allowed(self) -> None:
-        args = cli.make_parser().parse_args(["init", "--workspace", str(self.workspace), "--slides", "11", "--page-budget-reason", "Necessary source evidence remains readable."])
+
+    def test_page_budget_reason_is_preserved_without_hard_gate(self) -> None:
+        args = cli.make_parser().parse_args(["init", "--workspace", str(self.workspace), "--slides", "11", "--page-budget-reason", "Readable evidence"])
         self.assertTrue(cli.init_workspace(args)["ok"])
-        task = core.load_task(self.workspace)
-        self.assertEqual(task["page_budget_reason"], "Necessary source evidence remains readable.")
+        self.assertEqual(core.load_task(self.workspace)["page_budget_reason"], "Readable evidence")
         self.make_pptx()
         self.plan["max_slides"] = 0
-        self.audit()
-        report = paper.audit(self.workspace / "paper-plan.json", self.pptx, task["page_budget_reason"])
-        self.assertTrue(report["ok"], report["issues"])
-        self.assertEqual(report["exceptions"][0]["check"], "page_budget")
+        report = self.audit()
+        self.assertTrue(report["ok"])
+        self.assertTrue(any("planning target" in warning for warning in report["warnings"]))
+
 
     def test_actual_presentation_order_not_file_number(self) -> None:
         self.make_pptx()
@@ -201,6 +210,114 @@ class PaperTests(unittest.TestCase):
                 archive.writestr(name, content)
         slides, _, _ = paper._slides(self.pptx)
         self.assertIn("2 Method", slides[0]["text"])
+
+
+    def record_reader_review(self) -> None:
+        self.plan["reader_review"] = {
+            "artifact_sha256": core.sha256(self.pptx),
+            "reviewer": "First-time-reader review",
+            "findings": [{"slide": 1, "problem": "Undefined term", "change": "Added a definition"}],
+            "coverage_notes": "Checked the problem, mechanism, evidence, and limitations.",
+            "remaining_issues": [],
+        }
+
+    def test_reader_review_is_artifact_bound_not_automatic_comprehension(self) -> None:
+        self.make_pptx()
+        report = self.audit()
+        self.assertFalse(report["reader_review"]["current"])
+        self.record_reader_review()
+        review = self.audit()["reader_review"]
+        self.assertTrue(review["current"])
+        self.assertTrue(review["resolved"])
+        self.assertFalse(review["comprehension_verified_automatically"])
+        self.plan["reader_review"]["artifact_sha256"] = "outdated"
+        self.assertFalse(self.audit()["reader_review"]["current"])
+
+    def test_empty_or_malformed_reader_evidence_does_not_pass(self) -> None:
+        self.make_pptx()
+        for overrides in (
+            {"reviewer": "   "},
+            {"coverage_notes": "\n"},
+            {"reviewer": True, "coverage_notes": 42},
+            {"findings": [None]},
+            {"findings": [{"problem": "Undefined term", "change": "  "}]},
+        ):
+            with self.subTest(overrides=overrides):
+                self.record_reader_review()
+                self.plan["reader_review"].update(overrides)
+                self.assertFalse(self.audit()["reader_review"]["current"])
+        self.record_reader_review()
+        self.plan["reader_review"]["findings"] = []
+        self.assertTrue(self.audit()["reader_review"]["current"])
+
+    def test_reader_review_update_does_not_trigger_a_circular_rebuild(self) -> None:
+        self.test_default_init_is_eight_page_paper_profile()
+        self.make_pptx()
+        self.audit()
+        files = core.slide_files(self.workspace)
+        before = core.input_snapshot(self.workspace, files)
+        self.record_reader_review()
+        self.audit()
+        self.assertEqual(before, core.input_snapshot(self.workspace, files))
+        self.plan["slides"][0]["title"] = "Changed content"
+        self.audit()
+        self.assertNotEqual(before, core.input_snapshot(self.workspace, files))
+
+    def test_finalize_requires_current_resolved_reader_evidence(self) -> None:
+        self.make_pptx()
+        (self.workspace / "task.json").write_text(json.dumps({"profile": "paper", "slides": 1, "aspect_ratio": "16:9", "language": "en"}))
+        self.audit()
+        config = {"delivery": {"mode": "strict"}}
+        report = core.finalize(self.workspace, config)
+        self.assertFalse(report["checks"]["reader_review_current"])
+        self.record_reader_review()
+        self.audit()
+        report = core.finalize(self.workspace, config)
+        self.assertTrue(report["checks"]["reader_review_current"])
+        self.assertTrue(report["checks"]["reader_review_resolved"])
+        self.plan["reader_review"]["remaining_issues"] = ["The motivation remains unclear"]
+        self.audit()
+        self.assertFalse(core.finalize(self.workspace, config)["checks"]["reader_review_resolved"])
+
+    def test_section_metadata_is_optional(self) -> None:
+        self.make_pptx()
+        self.plan.pop("sections")
+        self.plan["slides"][0].pop("section_ids")
+        self.assertTrue(self.audit()["ok"])
+
+
+    def duplicate_slides(self, count: int) -> None:
+        with zipfile.ZipFile(self.pptx) as archive:
+            members = {name: archive.read(name) for name in archive.namelist()}
+        slide_ids = "".join(f'<p:sldId id="{i}" r:id="rId{i}"/>' for i in range(1, count + 1))
+        relationships = "".join(f'<Relationship Id="rId{i}" Target="slides/slide{i}.xml"/>' for i in range(1, count + 1))
+        members["ppt/presentation.xml"] = members["ppt/presentation.xml"].replace(b'<p:sldId id="1" r:id="rId1"/>', slide_ids.encode())
+        members["ppt/_rels/presentation.xml.rels"] = f'<Relationships>{relationships}</Relationships>'.encode()
+        for number in range(2, count + 1):
+            members[f"ppt/slides/slide{number}.xml"] = members["ppt/slides/slide1.xml"]
+        with zipfile.ZipFile(self.pptx, "w") as archive:
+            for name, content in members.items():
+                archive.writestr(name, content)
+        self.plan["slides"] = [dict(self.plan["slides"][0]) for _ in range(count)]
+
+    def test_repeated_layout_prompts_review_without_enforcing_columns(self) -> None:
+        self.make_pptx()
+        self.duplicate_slides(3)
+        for entry in self.plan["slides"]:
+            entry["layout"] = "two columns"
+        report = self.audit()
+        self.assertTrue(report["ok"])
+        self.assertTrue(any("layouts are identical" in warning for warning in report["warnings"]))
+
+    def test_narrative_return_is_advisory_not_subsection_order_gate(self) -> None:
+        self.make_pptx()
+        self.duplicate_slides(2)
+        self.plan["narrative_order"] = ["background", "method"]
+        self.plan["slides"][0]["narrative_stage"] = "method"
+        self.plan["slides"][1]["narrative_stage"] = "background"
+        report = self.audit()
+        self.assertTrue(report["ok"])
+        self.assertTrue(any("earlier narrative stage" in warning for warning in report["warnings"]))
 
 
 if __name__ == "__main__":

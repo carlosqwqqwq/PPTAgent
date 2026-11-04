@@ -112,8 +112,6 @@ def init_workspace(args: argparse.Namespace) -> dict[str, Any]:
         raise FileExistsError(f"refusing to replace {task_path}; pass --force")
     if args.slides < 1:
         raise ValueError("slides must be positive")
-    if args.profile == "paper" and args.slides > 10 and not args.page_budget_reason:
-        raise ValueError("paper presentations have a ten-slide target; explain an exception with --page-budget-reason")
     task = {
         "profile": args.profile,
         "slides": args.slides,

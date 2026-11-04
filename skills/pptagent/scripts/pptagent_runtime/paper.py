@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 import hashlib
-import itertools
 import json
+import math
 import posixpath
 import re
 import zipfile
@@ -61,9 +61,57 @@ def _slides(path: Path) -> tuple[list[dict[str, Any]], int, int]:
     return slides, width, height
 
 
-def _allowed_titles(sections: list[dict[str, Any]]) -> set[str]:
-    choices = [[section.get("display_title", section["title"]), *section.get("title_variants", [])] for section in sections]
-    return {compact(" / ".join(parts)) for parts in itertools.product(*choices)}
+
+def plan_source_digest(path: Path) -> str:
+    """Hash authored inputs, excluding artifact-bound review evidence."""
+    plan = json.loads(path.read_text(encoding="utf-8"))
+    plan.pop("reader_review", None)
+    encoded = json.dumps(plan, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _check_body(actual: dict[str, Any], title: str, body: list[str]) -> bool:
+    remaining = [
+        compact(shape["text"]) for shape in actual["shapes"]
+        if compact(shape["text"]) != title
+    ]
+    remaining.extend(compact(text) for text in actual["table_texts"])
+    for declared in sorted((compact(text) for text in body), key=len, reverse=True):
+        match = next(
+            (i for i, region in enumerate(remaining) if declared and declared in region),
+            None,
+        )
+        if match is None:
+            return False
+        remaining[match] = remaining[match].replace(declared, "\0", 1)
+    return True
+
+
+def _reader_review(plan: dict[str, Any], artifact_hash: str) -> dict[str, Any]:
+    review = plan.get("reader_review") or {}
+    def nonempty_text(value: Any) -> bool:
+        return isinstance(value, str) and bool(value.strip())
+
+    findings = review.get("findings")
+    recorded = bool(
+        nonempty_text(review.get("reviewer"))
+        and nonempty_text(review.get("coverage_notes"))
+        and isinstance(findings, list)
+        and all(
+            isinstance(finding, dict)
+            and nonempty_text(finding.get("problem"))
+            and nonempty_text(finding.get("change"))
+            for finding in findings
+        )
+        and isinstance(review.get("remaining_issues"), list)
+    )
+    return {
+        "recorded": recorded,
+        "current": recorded and review.get("artifact_sha256") == artifact_hash,
+        "resolved": recorded and not review["remaining_issues"],
+        "comprehension_verified_automatically": False,
+        "evidence": review,
+    }
 
 
 def audit(plan_path: Path, pptx_path: Path, page_budget_reason: str = "") -> dict[str, Any]:
@@ -71,97 +119,121 @@ def audit(plan_path: Path, pptx_path: Path, page_budget_reason: str = "") -> dic
     slides, width, height = _slides(pptx_path)
     planned = plan.get("slides", [])
     sections = plan.get("sections", [])
-    ids = [section["id"] for section in sections]
-    if len(ids) != len(set(ids)) or not ids:
-        raise ValueError("paper sections must have nonempty, unique IDs in source order")
-    section_map = {section["id"]: section for section in sections}
-    ranks = {section_id: index for index, section_id in enumerate(ids)}
+    section_ids = {section["id"] for section in sections}
+    if len(section_ids) != len(sections):
+        raise ValueError("source sections must have unique IDs")
+    topics = plan.get("key_topics", [])
+    topic_ids = {topic["id"] for topic in topics}
+    if len(topic_ids) != len(topics):
+        raise ValueError("key topics must have unique IDs")
     issues: list[str] = []
-    exceptions: list[dict[str, Any]] = []
+    warnings: list[str] = []
     if not plan.get("template_used"):
-        issues.append("Record the actual institutional template used.")
-    revision = plan.get("revision", True)
-    if revision and not plan.get("baseline_source"):
-        issues.append("A revision needs baseline_source from the previous deck.")
-    max_slides = int(plan.get("max_slides", 10))
-    page_exception = plan.get("page_budget_reason", "") or page_budget_reason
-    if max_slides > 10 or len(slides) > max_slides:
-        if page_exception:
-            exceptions.append({"check": "page_budget", "reason": page_exception})
-        else:
-            issues.append(f"Deck has {len(slides)} slides with budget {max_slides}; exceeding the ten-page target needs page_budget_reason.")
+        warnings.append("Record and visually verify the institutional template used.")
     if len(slides) != len(planned):
         issues.append(f"Plan has {len(planned)} slides; PPTX has {len(slides)}.")
-    last_rank = -1
-    seen: set[str] = set()
+    target = int(plan.get("max_slides", 10))
+    if len(slides) > target:
+        warnings.append(
+            f"Deck has {len(slides)} slides; the planning target is {target}. "
+            "Check whether the added pages support coverage or readability."
+        )
+    narrative_order = plan.get("narrative_order", [])
+    stage_ranks = {stage: rank for rank, stage in enumerate(narrative_order)}
+    last_stage = -1
+    covered: set[str] = set()
     measurements = []
+    layouts = []
     for number, (entry, actual) in enumerate(zip(planned, slides), 1):
         prefix = f"Slide {number}: "
-        kind = entry.get("kind", "content")
-        selected_ids = entry.get("section_ids", [])
-        unknown = [key for key in selected_ids if key not in ranks]
-        if unknown:
-            issues.append(prefix + f"unknown paper sections {unknown}.")
-        elif kind != "cover":
-            selected_ranks = [ranks[key] for key in selected_ids]
-            if not selected_ranks or selected_ranks != list(range(min(selected_ranks), max(selected_ranks) + 1)) or min(selected_ranks) < last_rank:
-                issues.append(prefix + "sections must be consecutive and follow paper order.")
-            if selected_ranks:
-                last_rank = max(selected_ranks)
-            if compact(entry.get("title", "")) not in _allowed_titles([section_map[key] for key in selected_ids]):
-                issues.append(prefix + "title is not a recorded paper heading or faithful continuation.")
-        seen.update(selected_ids)
         title = compact(entry.get("title", ""))
         if not title or title not in {compact(shape["text"]) for shape in actual["shapes"]}:
             issues.append(prefix + "declared title is not an actual PPTX text shape.")
         body = entry.get("body", [])
         if not isinstance(body, list) or any(not isinstance(text, str) for text in body):
             raise TypeError(prefix + "body must be a list of visible explanatory paragraphs")
-        remaining = [compact(shape["text"]) for shape in actual["shapes"] if compact(shape["text"]) != title]
-        remaining.extend(compact(text) for text in actual["table_texts"])
-        for declared in sorted((compact(text) for text in body), key=len, reverse=True):
-            match = next((i for i, region in enumerate(remaining) if declared and declared in region), None)
-            if match is None:
-                issues.append(prefix + "declared body text is absent from the PPTX or reuses an already-counted text span.")
-                break
-            remaining[match] = remaining[match].replace(declared, "\0", 1)
+        if not _check_body(actual, title, body):
+            issues.append(prefix + "declared body text is absent or reuses an already-counted span.")
+        unknown_sources = set(entry.get("section_ids", [])) - section_ids
+        if sections and unknown_sources:
+            warnings.append(prefix + f"source map has unknown sections: {sorted(unknown_sources)}.")
+        declared_topics = set(entry.get("topic_ids", []))
+        covered.update(declared_topics)
+        if topics and declared_topics - topic_ids:
+            warnings.append(prefix + "topic map has IDs not listed in key_topics.")
+        stage = entry.get("narrative_stage")
+        if stage in stage_ranks:
+            rank = stage_ranks[stage]
+            if rank < last_stage:
+                warnings.append(prefix + "returns to an earlier narrative stage; review the transition.")
+            last_stage = rank
+        elif stage and narrative_order:
+            warnings.append(prefix + f"narrative stage {stage!r} is not in the outline.")
         units = sum(text_units(text) for text in body)
         baseline = entry.get("baseline_body_units")
-        exception = entry.get("density_exception", "")
-        exempt = bool(exception)
-        if exempt:
-            exceptions.append({"slide": number, "check": "body_density", "reason": exception})
-        if kind == "text-only" and entry.get("figure_ids"):
-            issues.append(prefix + "a text-only density exception cannot contain figures.")
-        ratio = None
-        if kind != "cover" and revision:
-            if not isinstance(baseline, (int, float)) or isinstance(baseline, bool) or baseline <= 0:
-                if not exempt:
-                    issues.append(prefix + "missing positive previous-body baseline.")
-            else:
-                ratio = units / baseline
-                if not entry.get("baseline_mapping"):
-                    issues.append(prefix + "record which previous content supplies the baseline.")
-                if not 1.5 <= ratio <= 2.0 and not exempt:
-                    issues.append(prefix + f"body density is {ratio:.3f}x; expected 1.5–2.0x.")
+        comparable = (
+            isinstance(baseline, (int, float)) and not isinstance(baseline, bool)
+            and math.isfinite(baseline) and baseline > 0
+        )
+        ratio = units / baseline if comparable else None
+        if comparable and not (plan.get("baseline_source") and entry.get("baseline_mapping")):
+            warnings.append(prefix + "density comparison lacks a documented comparable baseline.")
         for shape in actual["shapes"]:
             x, y, text = shape["x"], shape["y"], shape["text"]
             if x is not None and y is not None and x < width * .5 and y >= height * .82:
                 if FOOTER.fullmatch(text.strip()) or re.fullmatch(r"\s*\d+(?:\s*/\s*\d+)?\s*", text):
                     issues.append(prefix + f"remove lower-left figure/page label: {text!r}.")
-        measurements.append({"slide": number, "title": entry.get("title"), "body_units": units, "baseline_body_units": baseline, "density_ratio": round(ratio, 4) if ratio is not None else None, "density_target_met": 1.5 <= ratio <= 2.0 if ratio is not None else None, "density_exception": exception if exempt else None})
-    missing = [key for key in ids if key not in seen]
+        if entry.get("layout"):
+            layouts.append(entry["layout"])
+        measurements.append({
+            "slide": number,
+            "title": entry.get("title"),
+            "body_units": units,
+            "baseline_body_units": baseline,
+            "density_ratio": round(ratio, 4) if ratio is not None else None,
+            "density_is_advisory": True,
+            "topic_ids": sorted(declared_topics),
+            "narrative_stage": stage,
+            "layout": entry.get("layout"),
+        })
+    missing = sorted(topic_ids - covered)
     if missing:
-        issues.append(f"Paper sections missing from the slide plan: {missing}.")
+        warnings.append(f"Key topics have no declared slide mapping: {missing}. Check coverage manually.")
+    if not topics:
+        warnings.append("Record the paper's essential topics and review their coverage manually.")
+    if len(layouts) >= 3 and len(set(layouts)) == 1:
+        warnings.append("All recorded layouts are identical; review whether different content needs a different arrangement.")
     experimental = sum(bool(entry.get("experimental")) for entry in planned)
-    budget = int(plan.get("experiment_page_budget", 2))
-    if experimental > budget:
-        if plan.get("experiment_budget_exception"):
-            exceptions.append({"check": "experiment_page_budget", "reason": plan["experiment_budget_exception"]})
-        else:
-            issues.append(f"Experimental content uses {experimental} slides; plan budget is {budget}. Record experiment_budget_exception if readability requires more.")
-    if experimental and not plan.get("experiment_layout_reason"):
-        issues.append("Record the compact experiment layout and readability rationale.")
-    if budget > 2 and not plan.get("experiment_layout_reason"):
-        issues.append("An expanded experiment budget needs a readability or evidence reason.")
-    return {"ok": not issues, "schema_version": "pptagent.paper.audit.v1", "artifact_sha256": _digest(pptx_path), "plan_sha256": _digest(plan_path), "slides": len(slides), "experimental_slides": experimental, "measurements": measurements, "issues": issues, "exceptions": exceptions, "manual_checks": ["Template fidelity; white/transparent background; academic style", "Faithful source headings and complete figure inventory", "Previous body-text selection and section regrouping", "Figure and body readability; grouped or inherited footer objects"]}
+    budget = plan.get("experiment_page_budget")
+    if budget is not None and experimental > int(budget):
+        warnings.append(
+            f"Experimental content uses {experimental} pages, above the planned {budget}; "
+            "prefer readable evidence over enforcing this count."
+        )
+    artifact_hash = _digest(pptx_path)
+    reader_review = _reader_review(plan, artifact_hash)
+    if not reader_review["current"]:
+        warnings.append("Record a first-time-reader review tied to the final PPTX hash.")
+    if reader_review["recorded"] and not reader_review["resolved"]:
+        warnings.append("The reader-review record still lists unresolved issues.")
+    return {
+        "ok": not issues,
+        "schema_version": "pptagent.paper.audit.v2",
+        "scope": "Deterministic artifact checks; no automatic comprehension judgment",
+        "artifact_sha256": artifact_hash,
+        "plan_sha256": _digest(plan_path),
+        "slides": len(slides),
+        "experimental_slides": experimental,
+        "measurements": measurements,
+        "issues": issues,
+        "warnings": warnings,
+        "coverage": {"declared_topic_ids": sorted(covered), "unmapped_topic_ids": missing, "verified_semantically": False},
+        "reader_review": reader_review,
+        "page_budget_reason": plan.get("page_budget_reason") or page_budget_reason,
+        "manual_checks": [
+            "Background, motivation, definitions, transitions, and first-time-reader understanding",
+            "Source accuracy, key-topic coverage, assumptions, evidence, and limitations",
+            "Useful layout variation, figure readability, template fidelity, and white background",
+            "Grouped or inherited footer objects and meaningful source labels inside figures",
+        ],
+    }

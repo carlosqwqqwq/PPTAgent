@@ -98,6 +98,8 @@ def save_state(workspace: Path, state: dict[str, Any]) -> None:
 
 
 def input_snapshot(workspace: Path, files: list[Path]) -> dict[str, Any]:
+    from .paper import plan_source_digest
+
     # Hash shared resources as a whole; parsing CSS/JS dependency graphs is unnecessary.
     resources = [path for path in (workspace / "assets").rglob("*") if path.is_file()]
     resources += [
@@ -110,7 +112,10 @@ def input_snapshot(workspace: Path, files: list[Path]) -> dict[str, Any]:
     return {
         "task": load_task(workspace),
         "files": {
-            str(path.relative_to(workspace)): sha256(path)
+            str(path.relative_to(workspace)): (
+                plan_source_digest(path)
+                if path == workspace / "paper-plan.json" else sha256(path)
+            )
             for path in sorted(set(files + resources))
         },
     }
@@ -503,6 +508,12 @@ def finalize(workspace: Path, config: dict[str, Any]) -> dict[str, Any]:
         if answer_exists and plan_path.is_file():
             paper_report = audit(plan_path, answer, task.get("page_budget_reason", ""))
         checks["paper_contract"] = bool(paper_report and paper_report["ok"])
+        checks["reader_review_current"] = bool(
+            paper_report and paper_report["reader_review"]["current"]
+        )
+        checks["reader_review_resolved"] = bool(
+            paper_report and paper_report["reader_review"]["resolved"]
+        )
     complete = all(checks.values())
     delivery_ready = bool(
         checks["answer_exists"] and checks["pptx_structure"] and checks["build_current"]

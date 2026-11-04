@@ -28,13 +28,18 @@ live in `config.example.yaml`.
 
 ## Paper presentation profile
 
-New tasks default to the paper profile: eight slides, a ten-slide target, the user's
-provided institutional template, and a white or transparent background. Read
-[references/paper-presentation.md](references/paper-presentation.md) before
-authoring a paper deck. Titles follow the paper section order; revisions target
-1.5–2 times the prior visible body text, with a justified text-only exception.
-Group experimental plots onto as few readable pages as possible and omit
-lower-left figure/page labels. Keep private template artwork out of the repo.
+New tasks use the paper profile: the supplied institutional template, a white
+or transparent background, and an eight-to-ten-page planning target. Read
+[references/paper-presentation.md](references/paper-presentation.md) first.
+Follow the paper's overall narrative and cover its key ideas. Use synthesized,
+descriptive titles rather than mandatory chapter headings or subsection labels.
+Build sufficient background and motivation, and use figures where they clarify
+the explanation, including earlier than their source section when useful.
+Choose layouts for each page's content; do not force every page into two halves.
+Text counts and experimental-page budgets are advisory, not quality gates.
+Before delivery, review the deck as a first-time reader and record specific
+problems and fixes. The CLI cannot automatically judge reader comprehension.
+Keep private template artwork out of the repo and omit lower-left page labels.
 Use `--profile general` only for a non-paper presentation.
 
 ## Create or revise

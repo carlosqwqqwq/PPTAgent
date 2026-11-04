@@ -1,97 +1,126 @@
-# Paper presentation defaults
+# Reader-centered paper presentations
 
-This fork defaults to academic paper presentations. Explicit task instructions
-may change the page budget; a generic presentation uses `--profile general`.
-The user's supplied institutional template is the layout source, not an
-inspiration to replace with an independently designed deck. Keep its cover,
-header, rules, margins, logo placement, and body proportions. Keep template
-files and institutional artwork in the private task workspace, not this repo.
+This fork defaults to academic paper presentations. Use the supplied
+institutional template's cover, header, palette, and visual identity. The body
+layout should adapt to the explanation, not reproduce a fixed split on every
+page. Keep the background pure white or transparent. Keep the original
+institutional template, artwork, and paper assets in the private task workspace,
+not in this public repository. Do not modify or publish to the upstream repo.
 
-## Structure and titles
+## Explain the paper, not its table of contents
 
-1. Extract the paper's numbered sections and subsections before outlining.
-2. Follow their source order throughout the deck. Use their original headings
-   or faithful translations as slide titles, retaining the section numbers.
-3. A combined slide names the consecutive sections it covers. A repeated
-   section may use a simple continuation label. Do not invent takeaway,
-   rhetorical, promotional, or conclusion-style titles in place of headings.
-4. Include implementation, discussion, related work, and conclusion when the
-   paper has them. Compress adjacent sections rather than silently replace them.
-5. Default to eight slides including the cover, with a ten-slide target.
-   This is a budget, not a reason to omit necessary paper sections or evidence.
+Follow the paper's overall progression: establish the background and problem,
+explain why it matters, introduce the approach, show evidence, and discuss what
+it means. Cover the important ideas across its major sections, without giving
+every subsection its own title or slide. Synthesize adjacent material and use
+concise descriptive titles that make the explanation clear. Exact source
+headings, numbering, and a one-to-one section-to-slide mapping are not required.
 
-## Text density
+Before outlining, identify the essential ideas and how they depend on each
+other. Introduce unfamiliar objects, terminology, and the task before the
+mechanism that uses them. Background and motivation need enough detail for a
+reader who has not read the paper. A source figure from a later section may
+appear early when it is the clearest way to establish the problem. Do not
+place figures together merely because they share a section number.
 
-For a revision, measure visible explanatory body text against the previous
-deck, excluding titles, figure captions, axis labels, citations, and footers.
-Target **1.5–2.0 times** the previous amount on each comparable content slide.
-Do not satisfy the target by increasing speaker notes, repeating claims,
-shrinking text until unreadable, or adding vague filler. Add concrete problem
-settings, assumptions, method steps, experiment conditions, findings, and
-interpretation already supported by the paper. Preserve usable body text size.
+Keep a private source map for checkable claims and a list of key topics covered
+in the deck. A section reference is provenance, not a rule about slide order.
+Explain important omissions rather than silently omit essential assumptions,
+implementation details, experimental conditions, or conclusions.
 
-Record which previous slides form the comparison and how regrouping affects
-it. Compare like-for-like material, not every new slide to the old deck-wide
-average. A text-only section with little source material may remain shorter;
-it does not need invented content or a decorative figure. The cover is exempt.
-These exceptions do not excuse sparse method or experimental explanation.
-If a specific target conflicts with legibility or source evidence, report the
-actual ratio and reason rather than claim the numerical target passed.
+## Information and layouts
 
-## Figures and experimental pages
+Use enough concrete explanation to make the argument understandable. Prefer
+problem settings, examples, assumptions, method steps, conditions, and
+interpretation over slogans or isolated labels. Summarize and connect ideas;
+adding words is not a substitute for explaining them. Never add repetition or
+shrink text merely to meet a count. A short text-only page is valid when the
+source and its role call for one.
 
-Use original paper figures wherever they convey useful evidence. Inventory
-figures and tables, including intentional omissions and the reason. Do not
-redraw scientific plots inaccurately or crop away meaningful legends and axes.
-For figure-heavy experimental sections, first group related plots into compact
-multi-panel pages, shrink proportionally, align edges, and remove unnecessary
-whitespace. Use the fewest pages whose labels and comparisons remain readable.
-Try two experimental pages for a ten-page deck, then verify at full size;
-more pages require a documented readability or evidence reason. Experimental
-plots must not crowd out the method, implementation, or discussion sections.
+The earlier 1.5–2 times body-text goal is not a per-slide acceptance rule.
+Optional measurements may help compare revisions, but page regrouping makes
+simple ratios misleading. Report a comparable baseline honestly when useful;
+no ratio or exception form is required to justify a good explanation.
 
-## Visual style and footer
+Choose the body layout for the content. Options include a full-width annotated
+figure, a short explanation above a diagram, a sequence of steps, compact
+comparison panels, and a text-led synthesis page. Two columns are an option,
+not the default for every page. Avoid repetitive half-and-half compositions.
+Keep the template identity consistent while varying useful body arrangements.
 
-Use a pure white or transparent background, subdued template blues and dark
-text, restrained separators, and simple academic typography. No gradients,
-saturated decorative cards, ornamental icons, large slogans, or AI-style
-promotional prose. Text-only pages are valid when the paper section has no
-figure. No lower-left figure number, source-page label, `p. N`, `Fig. N`, or
-slide-number annotation. Keep source mappings in speaker notes or the private
-asset manifest. Preserve meaningful labels inside original figure artwork.
+Aim for about eight to ten slides, but do not omit key evidence or compress
+figures beyond readability to satisfy a rigid count. The page budget is a
+planning aid. Figure-heavy experiments should use compact groups where the
+comparisons remain readable; there is no mandatory two-page experimental cap.
+Prefer fewer readable experimental pages over one figure per page, and prefer
+an additional readable page over an illegible collage.
 
-## Acceptance
+## Figures and academic style
 
-Use `paper-plan.json` to record the source order, approved translated titles,
-body-text baseline, figure inventory, and experiment budget. Run:
+Use original paper figures where they help explain a specific point. A reader
+must know what to look at and why it matters. Preserve meaningful axes,
+legends, code, and labels. A tiny original figure is not useful coverage: crop
+only an appropriate detail with context, summarize with a faithful explanation,
+or give it more room. Retain a private figure inventory and omission reasons.
+
+Use restrained template colors, dark text, simple typography, and clear
+hierarchy. Avoid gradients, saturated decorative cards, ornamental icons,
+promotional language, or generic AI-style claims. No lower-left figure-number,
+source-page, or slide-number labels. Keep source mappings in speaker notes or
+the private asset manifest; preserve useful labels within original artwork.
+
+## Read as a first-time reader before delivery
+
+Review the rendered deck without leaning on what the author already knows.
+Do this after authoring and again after material changes. Prefer an independent
+reader when available. Record specific problems and the changes made, not a
+blanket assertion that the deck looks fine. Check:
+
+- Can the reader identify the objects being studied, the task, and the problem?
+- Do background and motivation explain why the approach is needed?
+- Are terms introduced before use, and does each major transition make sense?
+- Can the reader explain the method and interpret the reported evidence?
+- Are assumptions, conditions, limits, and important source topics covered?
+- Does each figure have a readable scale and an explicit explanatory purpose?
+- Does the layout help this page rather than repeat a convenient template?
+- Is anything confusing when the reader lacks the paper and speaker notes?
+
+Verify source claims separately. Reader review is not a license to invent
+facts, inflate conclusions, or substitute aesthetic confidence for coverage.
+
+## Audit and review evidence
+
+`paper-plan.json` records the outline, source map, key-topic coverage, and
+optional quantitative comparisons. Run:
 
 ```bash
 python scripts/pptagent.py audit-paper --workspace /absolute/task \
   --plan /absolute/task/paper-plan.json --pptx /absolute/task/answer.pptx
 ```
 
-The audit checks the actual PPTX text and positions, not merely the plan. It
-checks sequence, title presence, declared body presence, text ratios, the page
-budget, and visible lower-left labels. It does not prove that a translation is
-faithful, that a declared baseline is correctly selected, or that every image
-is readable. Inspect every rendered slide and the exported PPTX; record these
-judgments separately. A numerical pass never replaces visual review.
+The v2 audit checks what code can establish: actual slide count, declared
+visible title/body text, duplicate text counting, source-map references, and
+simple lower-left labels. It reports page count, density, narrative-stage, and
+layout considerations as advisory information. It does not require literal
+chapter headings, consecutive subsection references, fixed layouts, density
+ratios, or a mandatory experimental-page count.
 
-The plan format is documented in `paper-plan.example.json`. `body` contains
-only visible explanatory text, and `baseline_body_units` uses `text_units()`:
-each CJK character is one unit; each Latin word or number token is one unit.
-The baseline must come from the prior deck and its selection must be described
-in `baseline_source` / `baseline_mapping`. `kind: text-only` or `cover` can carry
-a short `density_exception`; it remains visible in the report. Normal content
-slides with a missing or out-of-range baseline require correction or an
-explicit source/readability-based `density_exception`. The report keeps the
-measured ratio and `density_target_met` separate from that exception. No universal fixed word
-count is imposed on new decks: omit `baseline_body_units` only with
-`revision: false`. A paper plan is hashed into normal render/build evidence,
-and `finalize` enforces the audit for the paper profile.
+The audit cannot determine whether the reader understands the paper, whether
+a summary is accurate, or whether coverage is sufficient. `ok` means only that
+the deterministic checks passed. Coverage mappings remain author declarations,
+not automatic proof. Human source review and full-size visual inspection remain
+necessary, including grouped or inherited footer shapes.
 
-Numerical targets do not justify filler or illegible figures. A justified
-`page_budget_reason` can exceed ten pages (`init --page-budget-reason`), and
-`experiment_budget_exception` can exceed the planned experimental budget.
-All exceptions remain listed for human review; they do not make an unmet
-measurement pass. Continuation titles belong in section `title_variants`.
+After the reader review, record `reader_review` with the final PPTX's
+`artifact_sha256`, reviewer description, concrete `findings` and changes,
+`coverage_notes`, and `remaining_issues`. A current record establishes only
+that the review evidence refers to this artifact; the software does not judge
+the review's quality. `finalize` requires current reader-review evidence as well
+as the existing visual/build checks. Unresolved reader-review issues must be
+addressed before a complete delivery. Changing authored plan content invalidates normal render/build evidence.
+The artifact-bound `reader_review` field is excluded from source hashing, so
+recording the review after export does not trigger a circular rebuild.
+
+See `paper-plan.example.json`. Legacy fields such as `section_ids`,
+`baseline_body_units`, and `density_exception` remain readable for existing
+workspaces, but they no longer impose the rejected hard rules.
