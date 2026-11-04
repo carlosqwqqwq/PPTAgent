@@ -453,3 +453,13 @@ Existing tasks created with the earlier standalone scripts need fresh renders, r
 <p align="center">
   Part of <a href="../../README.md">PPTAgent</a> · <a href="LICENSE">MIT License</a>
 </p>
+
+
+## Academic paper defaults in this fork
+
+New tasks use an eight-page paper profile with a ten-page budget. Read the
+[paper presentation contract](references/paper-presentation.md) for template,
+section-title order, revision density, compact experimental panels, and footer
+rules. The supplied institutional template stays private. `audit-paper` checks
+the exported PPTX against a source-linked plan before delivery. Existing tasks
+without a profile retain their general workflow; `--profile general` opts out.

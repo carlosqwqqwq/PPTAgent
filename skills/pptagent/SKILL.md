@@ -26,11 +26,22 @@ When `review_slides` and `review_deck` MCP tools are available in text mode, use
 them for the corresponding review steps. Configuration is optional; defaults
 live in `config.example.yaml`.
 
+## Paper presentation profile
+
+New tasks default to the paper profile: eight slides, a ten-slide target, the user's
+provided institutional template, and a white or transparent background. Read
+[references/paper-presentation.md](references/paper-presentation.md) before
+authoring a paper deck. Titles follow the paper section order; revisions target
+1.5–2 times the prior visible body text, with a justified text-only exception.
+Group experimental plots onto as few readable pages as possible and omit
+lower-left figure/page labels. Keep private template artwork out of the repo.
+Use `--profile general` only for a non-paper presentation.
+
 ## Create or revise
 
 - Resolve the user's audience, message, page count, language, and aspect ratio.
   For a new workspace, run `init --workspace "$PWD" --slides N`, with optional
-  `--aspect-ratio 16:9|4:3|A1` and `--language`. Existing tasks use `task.json`.
+  `--profile paper|general`, `--aspect-ratio 16:9|4:3|A1` and `--language`. Existing tasks use `task.json`.
 - Use available research tools as needed and preserve sources for checkable
   claims. A manuscript or asset manifest is useful for complex decks, not a
   prerequisite for every edit.

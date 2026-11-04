@@ -1,0 +1,17 @@
+{
+  "revision": true,
+  "template_used": "Private institutional template, retained in the task workspace",
+  "baseline_source": "Previous delivered PPTX; explanatory body text only",
+  "max_slides": 10,
+  "experiment_page_budget": 2,
+  "experiment_layout_reason": "Related plots share compact panels with readable axes and legends.",
+  "sections": [
+    {"id": "1", "title": "Introduction", "display_title": "1 引言"},
+    {"id": "2", "title": "Method", "display_title": "2 方法", "title_variants": ["2 方法（续）"]}
+  ],
+  "slides": [
+    {"title": "Paper title", "section_ids": [], "kind": "cover", "body": [], "density_exception": "Cover contains bibliographic information."},
+    {"title": "1 引言", "section_ids": ["1"], "kind": "content", "body": ["The concrete problem, assumptions, and contribution."], "baseline_body_units": 5, "baseline_mapping": "Previous slide 2 body; same source section", "experimental": false, "figure_ids": []},
+    {"title": "2 方法", "section_ids": ["2"], "kind": "text-only", "body": ["A short source section without a figure."], "baseline_body_units": 7, "baseline_mapping": "Previous slide 3", "density_exception": "Short text-only section; no evidence added solely to fill space.", "experimental": false, "figure_ids": []}
+  ]
+}

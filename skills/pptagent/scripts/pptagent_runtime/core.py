@@ -51,7 +51,14 @@ def load_task(workspace: Path) -> dict[str, Any]:
         raise ValueError("task.json slides must be a positive integer")
     if task["aspect_ratio"] not in ASPECTS:
         raise ValueError(f"unsupported aspect ratio {task['aspect_ratio']!r}")
-    return {key: task[key] for key in ("slides", "aspect_ratio", "language")}
+    result = {key: task[key] for key in ("slides", "aspect_ratio", "language")}
+    if "profile" in task:
+        if task["profile"] not in {"paper", "general"}:
+            raise ValueError("unsupported task profile")
+        result["profile"] = task["profile"]
+    if task.get("page_budget_reason"):
+        result["page_budget_reason"] = task["page_budget_reason"]
+    return result
 
 
 def slide_files(workspace: Path) -> list[Path]:
@@ -98,6 +105,8 @@ def input_snapshot(workspace: Path, files: list[Path]) -> dict[str, Any]:
         for path in (workspace / "slides").rglob("*")
         if path.is_file() and path.suffix.lower() != ".html"
     ]
+    if (workspace / "paper-plan.json").is_file():
+        resources.append(workspace / "paper-plan.json")
     return {
         "task": load_task(workspace),
         "files": {
@@ -110,7 +119,8 @@ def input_snapshot(workspace: Path, files: list[Path]) -> dict[str, Any]:
 def scaffold(workspace: Path) -> dict[str, Any]:
     task = load_task(workspace)
     width, height, _ = ASPECTS[task["aspect_ratio"]]
-    template = (SKILL_ROOT / "assets/slide-template.html").read_text(encoding="utf-8")
+    template_name = "paper-slide-template.html" if task.get("profile") == "paper" else "slide-template.html"
+    template = (SKILL_ROOT / "assets" / template_name).read_text(encoding="utf-8")
     for name in ("slides", "assets"):
         (workspace / name).mkdir(exist_ok=True)
     created = []
@@ -486,6 +496,13 @@ def finalize(workspace: Path, config: dict[str, Any]) -> dict[str, Any]:
             )
         ),
     }
+    paper_report = None
+    if task.get("profile") == "paper":
+        from .paper import audit
+        plan_path = workspace / "paper-plan.json"
+        if answer_exists and plan_path.is_file():
+            paper_report = audit(plan_path, answer, task.get("page_budget_reason", ""))
+        checks["paper_contract"] = bool(paper_report and paper_report["ok"])
     complete = all(checks.values())
     delivery_ready = bool(
         checks["answer_exists"] and checks["pptx_structure"] and checks["build_current"]
@@ -499,6 +516,7 @@ def finalize(workspace: Path, config: dict[str, Any]) -> dict[str, Any]:
         "complete": complete,
         "delivery_ready": accepted,
         "checks": checks,
+        "paper_audit": paper_report,
         "artifact": answer.name if answer_exists else None,
         "artifact_sha256": artifact_hash,
         "slides": count,

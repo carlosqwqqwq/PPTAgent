@@ -41,3 +41,10 @@ Research notes and a manuscript are optional working aids. Keep provenance for
 externally checkable claims and reused assets in an appropriate form; no fixed
 notes schema is required. Revise existing content when the user asks, even if
 an earlier PPTX has already been built.
+
+
+For this fork, `init` defaults to `profile: paper` and eight slides. Read
+[paper-presentation.md](paper-presentation.md) and provide `paper-plan.json`.
+The plan is part of the render/build input snapshot; changing it invalidates
+old evidence. `audit-paper` checks an actual PPTX independently of rendering.
+General legacy tasks without `profile` retain their existing behavior.

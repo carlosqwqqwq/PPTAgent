@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from pptagent_runtime import core
+from pptagent_runtime import core, paper
 from pptagent_runtime.config import (
     SKILL_ROOT,
     load_config,
@@ -112,11 +112,16 @@ def init_workspace(args: argparse.Namespace) -> dict[str, Any]:
         raise FileExistsError(f"refusing to replace {task_path}; pass --force")
     if args.slides < 1:
         raise ValueError("slides must be positive")
+    if args.profile == "paper" and args.slides > 10 and not args.page_budget_reason:
+        raise ValueError("paper presentations have a ten-slide target; explain an exception with --page-budget-reason")
     task = {
+        "profile": args.profile,
         "slides": args.slides,
         "aspect_ratio": args.aspect_ratio,
         "language": args.language,
     }
+    if args.page_budget_reason:
+        task["page_budget_reason"] = args.page_budget_reason
     task_path.write_text(
         json.dumps(task, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
@@ -211,10 +216,16 @@ def make_parser() -> argparse.ArgumentParser:
         command.add_argument("--workspace", type=Path, default=Path.cwd())
     init = sub.add_parser("init")
     init.add_argument("--workspace", type=Path, required=True)
-    init.add_argument("--slides", type=int, required=True)
+    init.add_argument("--slides", type=int, default=8)
+    init.add_argument("--profile", choices=("paper", "general"), default="paper")
+    init.add_argument("--page-budget-reason", default="")
     init.add_argument("--aspect-ratio", choices=tuple(core.ASPECTS), default="16:9")
     init.add_argument("--language", default="zh")
     init.add_argument("--force", action="store_true")
+    audit = sub.add_parser("audit-paper")
+    audit.add_argument("--workspace", type=Path, default=Path.cwd())
+    audit.add_argument("--plan", type=Path)
+    audit.add_argument("--pptx", type=Path)
     slide = sub.add_parser("record-slide-review")
     slide.add_argument("--workspace", type=Path, default=Path.cwd())
     slide.add_argument("--slide", required=True)
@@ -267,6 +278,10 @@ def main() -> None:
                 parse_issues(args.issues_json),
                 "host",
             )
+        elif args.command == "audit-paper":
+            task = core.load_task(workspace) if (workspace / "task.json").is_file() else {}
+            result = paper.audit(args.plan or workspace / "paper-plan.json", args.pptx or workspace / "answer.pptx", task.get("page_budget_reason", ""))
+            (workspace / "paper-audit.json").write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         elif args.command == "finalize":
             result = core.finalize(workspace, config)
         else:
