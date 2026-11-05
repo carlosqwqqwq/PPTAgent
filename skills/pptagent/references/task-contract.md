@@ -35,7 +35,13 @@ that a browser collapses. The scaffold demonstrates these constraints.
 Give positioned text containers an explicit width with spare room, especially
 for mixed Chinese/Latin headings. Font metrics can differ after PPTX export;
 a tightly fitted browser heading can wrap and overlap the next element.
-Check the exported deck as well as the HTML renders.
+Check the exported deck as well as the HTML renders. Verify that the chosen
+fonts support the deck's languages and symbols and are available in the
+rendering environment and intended presentation software. Where the target
+software is available, inspect the final PPTX there for substitution, wrapping,
+clipping, alignment, and formula rendering. Record which software was checked;
+if the target is unavailable, disclose that limit instead of treating another
+renderer as proof of compatibility. Recheck affected pages after changes.
 
 Research notes and a manuscript are optional working aids. Keep provenance for
 externally checkable claims and reused assets in an appropriate form; no fixed

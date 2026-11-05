@@ -37,8 +37,14 @@ Build sufficient background and motivation, and use figures where they clarify
 the explanation, including earlier than their source section when useful.
 Choose layouts for each page's content; do not force every page into two halves.
 Text counts and experimental-page budgets are advisory, not quality gates.
-Before delivery, review the deck as a first-time reader and record specific
-problems and fixes. The CLI cannot automatically judge reader comprehension.
+Explain the core method in execution order, make quantitative claims
+interpretable, and give figures a reading entry point while preserving their
+scientific encoding. Separate the paper's conclusions from presenter analysis.
+Before delivery, review from a first-time reader's perspective by restating
+what the method does and what the evidence supports. Record specific problems
+and fixes, and recheck the revised exported deck.
+Check fonts and target-software compatibility, disclosing any unverified
+target. The CLI cannot automatically judge comprehension or compatibility.
 Keep private template artwork out of the repo and omit lower-left page labels.
 Use `--profile general` only for a non-paper presentation.
 

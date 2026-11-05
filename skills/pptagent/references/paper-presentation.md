@@ -28,6 +28,60 @@ in the deck. A section reference is provenance, not a rule about slide order.
 Explain important omissions rather than silently omit essential assumptions,
 implementation details, experimental conditions, or conclusions.
 
+## Make the core method reconstructable
+
+Explain the method in its actual execution order, not just as a list of named
+components. Give the reader enough information to follow a representative
+input through the method:
+
+- What is the input, and what objects or state does the method operate on?
+- What changes at each important step, and why is that change useful?
+- What stays fixed or must remain valid, and under which assumptions?
+- What comparison, acceptance rule, or stopping condition determines the next
+  step? Name what is compared and the granularity of that comparison.
+- What is the output, and how does it answer the original task?
+
+Apply these questions where they fit the paper; do not invent an invariant,
+decision rule, or stage that the source does not have. Distinguish preparation,
+generation, filtering, and evaluation when the method uses them. Explain which
+steps depend on earlier results, including loops and feedback when relevant.
+A running example can connect the stages more clearly than an abstract
+pipeline. Essential mechanism details belong in the visible explanation,
+rather than being available only in speaker notes.
+
+These are comprehension prompts, not mandatory slide titles, a fixed diagram,
+or a requirement to put every answer on one page. Choose text, examples,
+formulas, and diagrams according to what the reader needs to understand.
+
+## Keep claims and numbers interpretable
+
+Attach enough context to each important result for a reader to understand what
+was measured. State the relevant object or unit of analysis, metric and unit,
+comparison baseline, and experimental conditions. Explain whether a count is
+of inputs, pairs, runs, failures, or distinct findings; do not silently change
+the counting unit between the text and a chart.
+
+For percentages and aggregate results, identify the denominator or population
+and the aggregation rule where they affect interpretation. Distinguish totals,
+means, medians, maxima, and per-run results. For efficiency or effectiveness
+comparisons, explain the relevant time, compute, sampling, or search budget,
+and whether budgets are comparable. Report uncertainty, repeated-run scope,
+and unavailable details as the source supports them; never supply missing
+values by assumption.
+
+Separate multiple metrics instead of treating one as proof of another. For
+example, a higher discovery count does not by itself establish better
+coverage, faster discovery, or broader applicability. Keep qualifications close
+to the claim they limit, with enough context visible on the slide. Detailed
+provenance can remain in the private source map.
+
+Distinguish the paper's reported results and conclusions from the presenter's
+interpretation, criticism, or proposed extension. Use clear wording such as
+"The paper reports..." and "Our interpretation is..." when that distinction
+could be unclear. Do not present an inference as a measured result, a failure
+to observe as proof of absence, or evidence from a limited setting as a
+universal guarantee.
+
 ## Information and layouts
 
 Use enough concrete explanation to make the argument understandable. Prefer
@@ -63,11 +117,42 @@ legends, code, and labels. A tiny original figure is not useful coverage: crop
 only an appropriate detail with context, summarize with a faithful explanation,
 or give it more room. Retain a private figure inventory and omission reasons.
 
+Give each important chart a reading entry point: identify the relevant panel,
+axes, series or comparison, direct attention to the pattern that matters, and
+explain the supported takeaway with its limits. A caption that only names the
+figure is not an explanation. Use a short lead-in or a clear annotation when
+helpful; do not require the reader to search every curve before learning the
+question the chart answers.
+
+Preserve the scientific meaning of colors, line styles, markers, legends,
+and highlighted regions. The template palette governs added presentation
+elements, not a blanket recoloring of source figures. If a faithful redraw
+is needed, preserve the data and the distinction between series, and make the
+mapping clear and consistent. Do not crop away conditions or legends that
+would change the interpretation.
+
 Use restrained template colors, dark text, simple typography, and clear
 hierarchy. Avoid gradients, saturated decorative cards, ornamental icons,
 promotional language, or generic AI-style claims. No lower-left figure-number,
 source-page, or slide-number labels. Keep source mappings in speaker notes or
 the private asset manifest; preserve useful labels within original artwork.
+
+## Check fonts and the target presentation software
+
+Choose fonts that support the deck's language, mathematical symbols, and
+mixed-script text. Verify their availability in both the rendering environment
+and the intended presentation software. Use an available, compatible font
+rather than relying on a silent fallback. Font substitution can change line
+breaks, spacing, alignment, and symbol appearance even when HTML looks correct.
+
+Inspect the exported PPTX, not only browser renders. When the target software
+is available, open the final deck there and check font substitution, mixed
+Chinese/Latin wrapping, formulas, superscripts and subscripts, clipping,
+alignment, and image quality. Recheck affected slides after any font or export
+change. Record the software used for inspection and any compatibility limits.
+If the user's target software is unavailable, report the rendering environment
+actually checked and the unverified target; do not claim a compatibility pass
+from another renderer alone.
 
 ## Read as a first-time reader before delivery
 
@@ -84,6 +169,21 @@ blanket assertion that the deck looks fine. Check:
 - Does each figure have a readable scale and an explicit explanatory purpose?
 - Does the layout help this page rather than repeat a convenient template?
 - Is anything confusing when the reader lacks the paper and speaker notes?
+
+Ask the reviewer to restate the problem, the method's key steps, and the main
+evidence in their own words using the rendered slides. The restatement should
+identify what changes, what conditions are preserved, how decisions are made,
+and what the output means where relevant. For important results, ask what was
+counted or compared, under what budget and conditions, and what the result does
+and does not establish. Record the actual confusion or missing link revealed
+by this exercise, not only a checklist of positive answers.
+
+After revising, reread the changed pages and the surrounding transitions in
+the exported deck. Check whether the earlier misunderstanding is resolved and
+whether the change introduced a new one. Review the whole deck again after
+material changes to its story or method explanation. Record concrete fixes and
+any remaining issues in the existing review notes; these prompts do not impose
+a new field schema or an automatic comprehension score.
 
 Verify source claims separately. Reader review is not a license to invent
 facts, inflate conclusions, or substitute aesthetic confidence for coverage.
