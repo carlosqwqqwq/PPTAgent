@@ -28,31 +28,29 @@ live in `config.example.yaml`.
 
 ## Paper presentation profile
 
-New tasks use the paper profile: the supplied institutional template, a white
-or transparent background, and an eight-to-ten-page planning target. Read
-[references/paper-presentation.md](references/paper-presentation.md) first.
-Follow the paper's overall narrative and cover its key ideas. Use synthesized,
-descriptive titles rather than mandatory chapter headings or subsection labels.
-Build sufficient background and motivation, and use figures where they clarify
-the explanation, including earlier than their source section when useful.
-Choose layouts for each page's content; do not force every page into two halves.
-Text counts and experimental-page budgets are advisory, not quality gates.
-Explain the core method in execution order, make quantitative claims
-interpretable, and give figures a reading entry point while preserving their
-scientific encoding. Separate the paper's conclusions from presenter analysis.
-Before delivery, review from a first-time reader's perspective by restating
-what the method does and what the evidence supports. Record specific problems
-and fixes, and recheck the revised exported deck.
-Check fonts and target-software compatibility, disclosing any unverified
-target. The CLI cannot automatically judge comprehension or compatibility.
-Keep private template artwork out of the repo and omit lower-left page labels.
-Use `--profile general` only for a non-paper presentation.
+New tasks use the paper profile, with an eight-to-ten-page planning target.
+Read [references/paper-presentation.md](references/paper-presentation.md).
+Extract the supplied template's typography, header, spacing, and palette;
+the bundled starter is generic and does not import a PPTX template.
+Explain the problem and motivation, then the mechanism in execution order,
+then the evidence and limits. Allocate space to the reasoning rather than
+repeat a fixed layout. Keep quantitative claims interpretable and give figures
+a reading entry point. Text counts and page budgets are planning aids.
+
+Review every full-size exported page. First restate the argument without the
+paper, then check it against the source. Put useful findings and fixes in the
+normal deck-review record. Check fonts and the intended presentation software
+when available; the CLI's LibreOffice renders do not establish another app's
+compatibility. Keep private templates and source assets outside the repo, and
+omit added lower-left figure/page labels. Use `--profile general` for a
+non-paper presentation.
 
 ## Create or revise
 
 - Resolve the user's audience, message, page count, language, and aspect ratio.
   For a new workspace, run `init --workspace "$PWD" --slides N`, with optional
-  `--profile paper|general`, `--aspect-ratio 16:9|4:3|A1` and `--language`. Existing tasks use `task.json`.
+  `--profile paper|general`, `--aspect-ratio 16:9|4:3|A1`, `--language`, and
+  `--font-family "Template Body Font"`. Existing tasks use `task.json`.
 - Use available research tools as needed and preserve sources for checkable
   claims. A manuscript or asset manifest is useful for complex decks, not a
   prerequisite for every edit.
@@ -61,12 +59,13 @@ Use `--profile general` only for a non-paper presentation.
 - Run `review-slides`, inspect every returned image, then record each result:
 
 ```bash
-"$SKILL_PYTHON" "$SKILL_ROOT/scripts/pptagent.py" record-slide-review   --workspace "$PWD" --slide slides/slide01.html --verdict pass   --summary "Readable; no clipping, overlap, or broken images."
+"$SKILL_PYTHON" "$SKILL_ROOT/scripts/pptagent.py" record-slide-review   --workspace "$PWD" --slide slides/slide01.html --verdict pass   --summary "Describe what was inspected and any fixes or remaining issues."
 ```
 
-- Run `build`, then `review-deck`. Inspect the exported deck's contact sheets;
-  open full-size pages for dense content. Record `record-deck-review` with
-  `--verdict` and `--summary`. Text mode records visual results automatically.
+- Run `build`, then `review-deck`. Inspect every returned full-size page, then
+  use contact sheets for sequence and consistency. Record `record-deck-review`
+  with `--verdict` and `--summary`. Text mode combines full-page and overview
+  visual results automatically; the author still verifies source accuracy.
 - Fix issues that affect the user's requirements or visible quality. Source
   changes require fresh renders, reviews, and a build. Shared resource changes
   invalidate all slide reviews. Rendering alone does not establish a pass.
@@ -76,4 +75,7 @@ Use `--profile general` only for a non-paper presentation.
 
 Commands take `--workspace` with an absolute path and emit JSON. Use `--help`
 for arguments. A successful delivery includes a current `final-report.json`.
-Keep API keys in environment variables or the skill's `.env`, outside artifacts.
+`complete` describes the recorded workflow, not an automatic judgment of
+comprehension or target-application compatibility. Keep API keys in environment
+variables or the skill's `.env`, outside artifacts.
+

@@ -57,6 +57,7 @@ class WorkflowTests(unittest.TestCase):
         }
         state = core.load_state(self.workspace)
         if deck:
+            render["pages"] = [str(image.relative_to(self.workspace))]
             state["renders"]["deck"] = render
         else:
             state["renders"]["slides"]["slides/slide01.html"] = render

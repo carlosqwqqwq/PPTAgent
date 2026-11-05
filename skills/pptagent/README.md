@@ -461,8 +461,15 @@ New tasks use a reader-centered paper profile with an eight-to-ten-slide
 planning target. Read the [paper presentation contract](references/paper-presentation.md)
 for background and motivation, synthesis, key-topic coverage, flexible layouts,
 readable evidence, white backgrounds, and private template handling.
-`audit-paper` verifies actual PPTX text and reports quantitative observations;
-it does not judge comprehension or require literal chapter headings.
-Record a first-time-reader review of the final artifact before delivery.
+The generic starter supports a template-derived `--font-family` with explicit
+CJK fallbacks. It does not import the institutional template itself.
+`review-deck` checks every full-size exported page and then the overview;
+reader review and source checking use the same final review notes.
+`audit-paper` extracts actual PPTX text and compares an optional `paper-plan.json`.
+Counts, figure IDs, and XML presence do not establish visibility or comprehension.
+The final report separates structure and visual-review evidence and identifies
+LibreOffice as the renderer, without inferring PowerPoint or WPS compatibility.
+Planning-note edits do not trigger a rebuild of unchanged slides.
 Existing tasks without a profile retain their general workflow;
 `--profile general` opts out.
+

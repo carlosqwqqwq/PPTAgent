@@ -16,6 +16,7 @@ from xml.etree import ElementTree as ET
 from PIL import Image, ImageDraw
 
 from .config import SKILL_ROOT, node_environment
+from .typography import paper_font_family
 from .visual import validate_review
 
 if TYPE_CHECKING:
@@ -58,6 +59,8 @@ def load_task(workspace: Path) -> dict[str, Any]:
         result["profile"] = task["profile"]
     if task.get("page_budget_reason"):
         result["page_budget_reason"] = task["page_budget_reason"]
+    if task.get("font_family"):
+        result["font_family"] = task["font_family"]
     return result
 
 
@@ -98,8 +101,6 @@ def save_state(workspace: Path, state: dict[str, Any]) -> None:
 
 
 def input_snapshot(workspace: Path, files: list[Path]) -> dict[str, Any]:
-    from .paper import plan_source_digest
-
     # Hash shared resources as a whole; parsing CSS/JS dependency graphs is unnecessary.
     resources = [path for path in (workspace / "assets").rglob("*") if path.is_file()]
     resources += [
@@ -107,15 +108,12 @@ def input_snapshot(workspace: Path, files: list[Path]) -> dict[str, Any]:
         for path in (workspace / "slides").rglob("*")
         if path.is_file() and path.suffix.lower() != ".html"
     ]
-    if (workspace / "paper-plan.json").is_file():
-        resources.append(workspace / "paper-plan.json")
+    task = load_task(workspace)
+    task.pop("page_budget_reason", None)
     return {
-        "task": load_task(workspace),
+        "task": task,
         "files": {
-            str(path.relative_to(workspace)): (
-                plan_source_digest(path)
-                if path == workspace / "paper-plan.json" else sha256(path)
-            )
+            str(path.relative_to(workspace)): sha256(path)
             for path in sorted(set(files + resources))
         },
     }
@@ -124,7 +122,11 @@ def input_snapshot(workspace: Path, files: list[Path]) -> dict[str, Any]:
 def scaffold(workspace: Path) -> dict[str, Any]:
     task = load_task(workspace)
     width, height, _ = ASPECTS[task["aspect_ratio"]]
-    template_name = "paper-slide-template.html" if task.get("profile") == "paper" else "slide-template.html"
+    template_name = (
+        "paper-slide-template.html"
+        if task.get("profile") == "paper"
+        else "slide-template.html"
+    )
     template = (SKILL_ROOT / "assets" / template_name).read_text(encoding="utf-8")
     for name in ("slides", "assets"):
         (workspace / name).mkdir(exist_ok=True)
@@ -139,6 +141,7 @@ def scaffold(workspace: Path) -> dict[str, Any]:
             "WIDTH": width,
             "HEIGHT": height,
             "SLIDE_NUMBER": f"{number:02d}",
+            "FONT_FAMILY": paper_font_family(task["language"], task.get("font_family")),
         }.items():
             source = source.replace("{{" + key + "}}", str(value))
         path.write_text(source, encoding="utf-8")
@@ -429,20 +432,43 @@ def render_deck(workspace: Path) -> dict[str, Any]:
         for index, page in enumerate(document, start=1):
             pixmap = page.get_pixmap(matrix=pymupdf.Matrix(1.7, 1.7), alpha=False)
             pixmap.save(output_dir / f"page-{index:02d}.jpg")
-    pages = sorted(output_dir.glob("page-*.jpg"))
+    pages = sorted(
+        output_dir.glob("page-*.jpg"), key=lambda path: int(path.stem.split("-")[-1])
+    )
+    expected_count, _ = pptx_info(answer)
+    if len(pages) != expected_count:
+        raise ValueError(
+            f"exported deck has {expected_count} slides but rendered {len(pages)} pages"
+        )
     contacts = _contact_sheets(pages, output_dir)
     state = load_state(workspace)
     state["renders"]["deck"] = {
         "inputs": {"artifact_sha256": artifact_hash},
-        "images": {str(path.relative_to(workspace)): sha256(path) for path in contacts},
+        "images": {
+            str(path.relative_to(workspace)): sha256(path) for path in pages + contacts
+        },
+        "pages": [str(path.relative_to(workspace)) for path in pages],
+        "renderer": "LibreOffice",
     }
     save_state(workspace, state)
     return {
         "ok": True,
         "artifact_sha256": artifact_hash,
+        "renderer": "LibreOffice",
         "pages": [str(path.relative_to(workspace)) for path in pages],
         "contact_sheets": [str(path.relative_to(workspace)) for path in contacts],
     }
+
+
+def deck_render_current(
+    workspace: Path, render: dict[str, Any], artifact_hash: str, count: int
+) -> bool:
+    pages = render.get("pages", [])
+    return (
+        len(set(pages)) == len(pages) == count
+        and all(page in render.get("images", {}) for page in pages)
+        and render_current(workspace, render, {"artifact_sha256": artifact_hash})
+    )
 
 
 def record_deck_review(
@@ -457,7 +483,8 @@ def record_deck_review(
         raise FileNotFoundError(answer)
     state = load_state(workspace)
     render = state["renders"]["deck"]
-    if not render_current(workspace, render, {"artifact_sha256": sha256(answer)}):
+    count, _ = pptx_info(answer)
+    if not deck_render_current(workspace, render, sha256(answer), count):
         raise ValueError(
             "missing or stale deck render; run review-deck and inspect it first"
         )
@@ -496,24 +523,23 @@ def finalize(workspace: Path, config: dict[str, Any]) -> dict[str, Any]:
         "deck_review_current": bool(
             answer_exists
             and deck.get("ok") is True
-            and render_current(
-                workspace, deck.get("render", {}), {"artifact_sha256": artifact_hash}
+            and deck_render_current(
+                workspace, deck.get("render", {}), artifact_hash, count
             )
         ),
     }
     paper_report = None
     if task.get("profile") == "paper":
         from .paper import audit
+
         plan_path = workspace / "paper-plan.json"
-        if answer_exists and plan_path.is_file():
-            paper_report = audit(plan_path, answer, task.get("page_budget_reason", ""))
+        if answer_exists:
+            paper_report = audit(
+                plan_path if plan_path.is_file() else None,
+                answer,
+                task.get("page_budget_reason", ""),
+            )
         checks["paper_contract"] = bool(paper_report and paper_report["ok"])
-        checks["reader_review_current"] = bool(
-            paper_report and paper_report["reader_review"]["current"]
-        )
-        checks["reader_review_resolved"] = bool(
-            paper_report and paper_report["reader_review"]["resolved"]
-        )
     complete = all(checks.values())
     delivery_ready = bool(
         checks["answer_exists"] and checks["pptx_structure"] and checks["build_current"]
@@ -523,11 +549,22 @@ def finalize(workspace: Path, config: dict[str, Any]) -> dict[str, Any]:
     )
     report = {
         "ok": accepted,
-        "schema_version": "pptagent.standalone.final.v1",
+        "schema_version": "pptagent.standalone.final.v2",
         "complete": complete,
         "delivery_ready": accepted,
         "checks": checks,
         "paper_audit": paper_report,
+        "verification": {
+            "structure": "PPTX size, slide count, source freshness, and plan text when supplied",
+            "visual_review": {
+                "current": checks["deck_review_current"],
+                "mode": deck.get("review_mode"),
+                "renderer": deck.get("render", {}).get("renderer", "unspecified"),
+                "summary": deck.get("summary"),
+            },
+            "content": "Reader comprehension and source accuracy require reviewer judgment",
+            "compatibility": "Applies to the recorded renderer; target-application compatibility is not inferred",
+        },
         "artifact": answer.name if answer_exists else None,
         "artifact_sha256": artifact_hash,
         "slides": count,

@@ -1,226 +1,149 @@
 # Reader-centered paper presentations
 
-This fork defaults to academic paper presentations. Use the supplied
-institutional template's cover, header, palette, and visual identity. The body
-layout should adapt to the explanation, not reproduce a fixed split on every
-page. Keep the background pure white or transparent. Keep the original
-institutional template, artwork, and paper assets in the private task workspace,
-not in this public repository. Do not modify or publish to the upstream repo.
+Explain the paper to someone who has not read it. Start with the supplied
+institutional template, keep a white or transparent background, and adapt the
+body layout to the material. Keep private papers, template files, and artwork
+in the task workspace, outside this repository.
 
-## Explain the paper, not its table of contents
+## Start from the template and the argument
 
-Follow the paper's overall progression: establish the background and problem,
-explain why it matters, introduce the approach, show evidence, and discuss what
-it means. Cover the important ideas across its major sections, without giving
-every subsection its own title or slide. Synthesize adjacent material and use
-concise descriptive titles that make the explanation clear. Exact source
-headings, numbering, and a one-to-one section-to-slide mapping are not required.
+Inspect the template's cover, header, title/body fonts, text area, palette, and
+spacing before authoring. Carry those choices into the HTML. The bundled paper
+starter is a generic example, not an imported institutional template. It starts
+with a single-column explanation; its optional figure layout is one choice.
+Use `init --font-family "Template Body Font"` to place the supplied font first
+in the starter's font stack. Set distinct heading fonts in the slide CSS when
+the template uses them. `scaffold` preserves existing slides.
 
-Before outlining, identify the essential ideas and how they depend on each
-other. Introduce unfamiliar objects, terminology, and the task before the
-mechanism that uses them. Background and motivation need enough detail for a
-reader who has not read the paper. A source figure from a later section may
-appear early when it is the clearest way to establish the problem. Do not
-place figures together merely because they share a section number.
+Read the whole paper before allocating pages. Identify the problem, why the
+existing approach is insufficient, the core mechanism, the evidence, and the
+limits. Introduce unfamiliar objects and terms before using them. Follow these
+dependencies rather than reproduce the table of contents. Use descriptive
+page titles and bring a later source figure forward when it explains the
+motivation better. Keep a private source map for claims and reused figures.
 
-Keep a private source map for checkable claims and a list of key topics covered
-in the deck. A section reference is provenance, not a rule about slide order.
-Explain important omissions rather than silently omit essential assumptions,
-implementation details, experimental conditions, or conclusions.
+About eight to ten slides is a starting point. Assign space according to the
+explanation: a difficult mechanism may need a worked example and a second
+page; a simple comparison may fit beside its evidence. Background and
+motivation must establish enough context to make the method understandable.
+Combine related experiments where labels remain readable. Add a page when
+that is clearer than compressing figures or omitting an essential step.
 
-## Make the core method reconstructable
+## Explain what happens and why
 
-Explain the method in its actual execution order, not just as a list of named
-components. Give the reader enough information to follow a representative
-input through the method:
+Show a representative input moving through the method in execution order.
+Explain the objects or state, the important operations, why each operation is
+useful, the conditions that must hold, and what the output means. Where the
+method compares, filters, or stops, name the quantities and decision rule.
+Distinguish preparation, generation, filtering, and evaluation when the paper
+uses them; show loops and dependencies when they matter.
 
-- What is the input, and what objects or state does the method operate on?
-- What changes at each important step, and why is that change useful?
-- What stays fixed or must remain valid, and under which assumptions?
-- What comparison, acceptance rule, or stopping condition determines the next
-  step? Name what is compared and the granularity of that comparison.
-- What is the output, and how does it answer the original task?
+Use the detail that makes the mechanism reconstructable. A page that names
+three components still needs to explain how they interact. Replace vague
+phrases such as "an efficient, robust framework" with the actual operation and
+its consequence. A running example, annotated diagram, or short paragraph can
+supply that connection. Put essential explanation on the slide, not only in
+speaker notes. These are writing questions, not mandatory fields or headings.
 
-Apply these questions where they fit the paper; do not invent an invariant,
-decision rule, or stage that the source does not have. Distinguish preparation,
-generation, filtering, and evaluation when the method uses them. Explain which
-steps depend on earlier results, including loops and feedback when relevant.
-A running example can connect the stages more clearly than an abstract
-pipeline. Essential mechanism details belong in the visible explanation,
-rather than being available only in speaker notes.
+Allocate the page to its job: explanation above a diagram, a large annotated
+figure, a sequence of steps, a compact comparison, or a text-led synthesis.
+Two columns are useful when the two parts relate; they are not a default for
+every page. Match the amount and placement of information to the reasoning,
+not to a repeated card layout. Do not pad a short page or shrink a long one to
+hit a count. Optional text-unit comparisons describe revisions; they do not
+measure explanation quality, and regrouped pages may not be comparable.
 
-These are comprehension prompts, not mandatory slide titles, a fixed diagram,
-or a requirement to put every answer on one page. Choose text, examples,
-formulas, and diagrams according to what the reader needs to understand.
+## Make evidence interpretable
 
-## Keep claims and numbers interpretable
+For an important result, identify what was counted or compared, the metric and
+unit, the baseline, and the relevant setting or budget. Explain denominators
+and aggregation when they change the meaning. Keep totals, per-run results,
+means, maxima, and distinct findings separate. A larger count alone does not
+establish broader coverage or greater efficiency. Preserve the source's
+uncertainty and limitations; leave unavailable details unspecified.
 
-Attach enough context to each important result for a reader to understand what
-was measured. State the relevant object or unit of analysis, metric and unit,
-comparison baseline, and experimental conditions. Explain whether a count is
-of inputs, pairs, runs, failures, or distinct findings; do not silently change
-the counting unit between the text and a chart.
+Distinguish the paper's measured results and conclusions from presenter
+analysis or proposed extensions where the distinction matters. Use ordinary,
+specific wording, not a disclaimer before every sentence. Keep qualifications
+next to the claim they affect.
 
-For percentages and aggregate results, identify the denominator or population
-and the aggregation rule where they affect interpretation. Distinguish totals,
-means, medians, maxima, and per-run results. For efficiency or effectiveness
-comparisons, explain the relevant time, compute, sampling, or search budget,
-and whether budgets are comparable. Report uncertainty, repeated-run scope,
-and unavailable details as the source supports them; never supply missing
-values by assumption.
+Use original figures where they explain a point. Give the reader an entry:
+which panel, axis, series, or comparison to inspect, what pattern matters, and
+what it supports. A figure name alone is not an explanation. Preserve useful
+labels, axes, legends, code, and scientific color/line/marker meanings. The
+template palette applies to added presentation elements, not blanket
+recoloring of source data. A faithful redraw must preserve the data and series
+mapping. Crop only when the relevant context and conditions remain clear.
 
-Separate multiple metrics instead of treating one as proof of another. For
-example, a higher discovery count does not by itself establish better
-coverage, faster discovery, or broader applicability. Keep qualifications close
-to the claim they limit, with enough context visible on the slide. Detailed
-provenance can remain in the private source map.
+Inspect each figure in the exported page at presentation size. An asset in a
+folder, a figure ID in a plan, or an image object in PPTX XML does not establish
+that the figure is visible or readable. Enlarge or reorganize it when needed.
+Record important omissions in the private source map. Keep added styling
+restrained: dark text, simple hierarchy, template colors, no decorative cards
+or promotional slogans. Omit added lower-left figure/page/source labels;
+preserve meaningful labels inside original figures and chart axes.
 
-Distinguish the paper's reported results and conclusions from the presenter's
-interpretation, criticism, or proposed extension. Use clear wording such as
-"The paper reports..." and "Our interpretation is..." when that distinction
-could be unclear. Do not present an inference as a measured result, a failure
-to observe as proof of absence, or evidence from a limited setting as a
-universal guarantee.
+## Review the exported deck
 
-## Information and layouts
+Use HTML previews while authoring. After export, inspect **every full-size
+page** for actual text, wrapping, clipping, formulas, alignment, images, and
+figure labels. Contact sheets help compare flow and consistency but cannot
+replace this page-level inspection. Text mode checks each full-size page and
+then the contact sheets, combining the results into one deck review.
 
-Use enough concrete explanation to make the argument understandable. Prefer
-problem settings, examples, assumptions, method steps, conditions, and
-interpretation over slogans or isolated labels. Summarize and connect ideas;
-adding words is not a substitute for explaining them. Never add repetition or
-shrink text merely to meet a count. A short text-only page is valid when the
-source and its role call for one.
+First read the exported deck without the paper or author notes. Prefer an
+independent reader when available. Restate the problem, method, and evidence
+in ordinary words; note where a term, step, transition, or interpretation is
+missing. Then open the paper and check that restatement against the original
+method, figures, results, conditions, and limitations. This second pass catches
+an explanation that is easy to follow but wrong or incomplete.
 
-The earlier 1.5–2 times body-text goal is not a per-slide acceptance rule.
-Optional measurements may help compare revisions, but page regrouping makes
-simple ratios misleading. Report a comparable baseline honestly when useful;
-no ratio or exception form is required to justify a good explanation.
+Fix the actual gaps. Reread changed pages and adjacent transitions in the new
+export; reread the full argument after material changes. Record the important
+findings and fixes in the existing final `record-deck-review --summary` and
+issues. No extra comprehension score or sign-off form is needed. The external
+visual reviewer sees slides, not the source paper; the author still performs
+the source check. A visual pass is not a claim that source accuracy was
+verified automatically.
 
-Choose the body layout for the content. Options include a full-width annotated
-figure, a short explanation above a diagram, a sequence of steps, compact
-comparison panels, and a text-led synthesis page. Two columns are an option,
-not the default for every page. Avoid repetitive half-and-half compositions.
-Keep the template identity consistent while varying useful body arrangements.
+Preserve template fonts where they are available and support the deck's
+languages and symbols. The starter adds explicit CJK fallbacks, but those
+fonts still need to be installed. Check the actual font selected by the
+renderer, not only the first CSS family name. If a template font is missing,
+choose an available substitute with suitable glyphs and similar style, then
+recheck layout. HTML font fallback does not guarantee another app's fallback.
 
-Aim for about eight to ten slides, but do not omit key evidence or compress
-figures beyond readability to satisfy a rigid count. The page budget is a
-planning aid. Figure-heavy experiments should use compact groups where the
-comparisons remain readable; there is no mandatory two-page experimental cap.
-Prefer fewer readable experimental pages over one figure per page, and prefer
-an additional readable page over an illegible collage.
+The CLI's exported images use LibreOffice. When PowerPoint, WPS, or another
+application is the delivery target, open the final PPTX there when available
+and inspect substitution, mixed Chinese/Latin wrapping, formulas, and figures.
+Record the software actually inspected and any untested target in the review
+summary. Recheck after font or export changes.
 
-## Figures and academic style
+## Optional structural audit
 
-Use original paper figures where they help explain a specific point. A reader
-must know what to look at and why it matters. Preserve meaningful axes,
-legends, code, and labels. A tiny original figure is not useful coverage: crop
-only an appropriate detail with context, summarize with a faithful explanation,
-or give it more room. Retain a private figure inventory and omission reasons.
-
-Give each important chart a reading entry point: identify the relevant panel,
-axes, series or comparison, direct attention to the pattern that matters, and
-explain the supported takeaway with its limits. A caption that only names the
-figure is not an explanation. Use a short lead-in or a clear annotation when
-helpful; do not require the reader to search every curve before learning the
-question the chart answers.
-
-Preserve the scientific meaning of colors, line styles, markers, legends,
-and highlighted regions. The template palette governs added presentation
-elements, not a blanket recoloring of source figures. If a faithful redraw
-is needed, preserve the data and the distinction between series, and make the
-mapping clear and consistent. Do not crop away conditions or legends that
-would change the interpretation.
-
-Use restrained template colors, dark text, simple typography, and clear
-hierarchy. Avoid gradients, saturated decorative cards, ornamental icons,
-promotional language, or generic AI-style claims. No lower-left figure-number,
-source-page, or slide-number labels. Keep source mappings in speaker notes or
-the private asset manifest; preserve useful labels within original artwork.
-
-## Check fonts and the target presentation software
-
-Choose fonts that support the deck's language, mathematical symbols, and
-mixed-script text. Verify their availability in both the rendering environment
-and the intended presentation software. Use an available, compatible font
-rather than relying on a silent fallback. Font substitution can change line
-breaks, spacing, alignment, and symbol appearance even when HTML looks correct.
-
-Inspect the exported PPTX, not only browser renders. When the target software
-is available, open the final deck there and check font substitution, mixed
-Chinese/Latin wrapping, formulas, superscripts and subscripts, clipping,
-alignment, and image quality. Recheck affected slides after any font or export
-change. Record the software used for inspection and any compatibility limits.
-If the user's target software is unavailable, report the rendering environment
-actually checked and the unverified target; do not claim a compatibility pass
-from another renderer alone.
-
-## Read as a first-time reader before delivery
-
-Review the rendered deck without leaning on what the author already knows.
-Do this after authoring and again after material changes. Prefer an independent
-reader when available. Record specific problems and the changes made, not a
-blanket assertion that the deck looks fine. Check:
-
-- Can the reader identify the objects being studied, the task, and the problem?
-- Do background and motivation explain why the approach is needed?
-- Are terms introduced before use, and does each major transition make sense?
-- Can the reader explain the method and interpret the reported evidence?
-- Are assumptions, conditions, limits, and important source topics covered?
-- Does each figure have a readable scale and an explicit explanatory purpose?
-- Does the layout help this page rather than repeat a convenient template?
-- Is anything confusing when the reader lacks the paper and speaker notes?
-
-Ask the reviewer to restate the problem, the method's key steps, and the main
-evidence in their own words using the rendered slides. The restatement should
-identify what changes, what conditions are preserved, how decisions are made,
-and what the output means where relevant. For important results, ask what was
-counted or compared, under what budget and conditions, and what the result does
-and does not establish. Record the actual confusion or missing link revealed
-by this exercise, not only a checklist of positive answers.
-
-After revising, reread the changed pages and the surrounding transitions in
-the exported deck. Check whether the earlier misunderstanding is resolved and
-whether the change introduced a new one. Review the whole deck again after
-material changes to its story or method explanation. Record concrete fixes and
-any remaining issues in the existing review notes; these prompts do not impose
-a new field schema or an automatic comprehension score.
-
-Verify source claims separately. Reader review is not a license to invent
-facts, inflate conclusions, or substitute aesthetic confidence for coverage.
-
-## Audit and review evidence
-
-`paper-plan.json` records the outline, source map, key-topic coverage, and
-optional quantitative comparisons. Run:
+`audit-paper` reads the actual PPTX. An optional `paper-plan.json` can hold an
+outline, source/topic/figure mapping, and comparable revision measurements:
 
 ```bash
-python scripts/pptagent.py audit-paper --workspace /absolute/task \
-  --plan /absolute/task/paper-plan.json --pptx /absolute/task/answer.pptx
+python scripts/pptagent.py audit-paper --workspace /absolute/task
 ```
 
-The v2 audit checks what code can establish: actual slide count, declared
-visible title/body text, duplicate text counting, source-map references, and
-simple lower-left labels. It reports page count, density, narrative-stage, and
-layout considerations as advisory information. It does not require literal
-chapter headings, consecutive subsection references, fixed layouts, density
-ratios, or a mandatory experimental-page count.
+The report includes extracted text and text-unit counts for every slide, even
+when it is absent from the plan. If title/body text is declared, the audit
+checks its presence and avoids counting the same text span twice. Extracted
+XML may include hidden or off-slide text; picture counts omit some inherited
+or drawn figures. Neither is a visibility or coverage score. Figure/topic
+mappings remain declarations for review.
 
-The audit cannot determine whether the reader understands the paper, whether
-a summary is accurate, or whether coverage is sufficient. `ok` means only that
-the deterministic checks passed. Coverage mappings remain author declarations,
-not automatic proof. Human source review and full-size visual inspection remain
-necessary, including grouped or inherited footer shapes.
+Page budgets, layout repetition, narrative transitions, and suspected
+lower-left labels are advisory. A numeric chart label near the corner is not
+a structural failure. `ok` means only that the structural comparisons passed.
+The final report distinguishes those checks from the recorded visual judgment
+and does not infer target-application compatibility.
 
-After the reader review, record `reader_review` with the final PPTX's
-`artifact_sha256`, reviewer description, concrete `findings` and changes,
-`coverage_notes`, and `remaining_issues`. A current record establishes only
-that the review evidence refers to this artifact; the software does not judge
-the review's quality. `finalize` requires current reader-review evidence as well
-as the existing visual/build checks. Unresolved reader-review issues must be
-addressed before a complete delivery. Changing authored plan content invalidates normal render/build evidence.
-The artifact-bound `reader_review` field is excluded from source hashing, so
-recording the review after export does not trigger a circular rebuild.
-
-See `paper-plan.example.json`. Legacy fields such as `section_ids`,
-`baseline_body_units`, and `density_exception` remain readable for existing
-workspaces, but they no longer impose the rejected hard rules.
+The plan is not a rendering input. Editing notes or source mappings does not
+invalidate unchanged slide renders, but `audit-paper` and `finalize` reread the
+current plan. HTML, CSS, assets, and render-affecting task changes still need
+fresh export/review evidence. Existing `reader_review` records remain readable
+as optional artifact-bound notes; final review uses the normal deck record.
+See `paper-plan.example.json` for a small example, not a required form.

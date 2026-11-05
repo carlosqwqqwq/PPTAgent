@@ -3,7 +3,7 @@
 Keep the task workspace separate from the skill:
 
 ```text
-task.json                 slides, aspect_ratio, language
+task.json                 slides, aspect_ratio, language; optional profile, font_family
 slides/slideNN.html        editable slide sources, numbered from 1
 assets/                   local images, CSS, fonts, and other resources
 qa/                       generated renders and contact sheets
@@ -50,8 +50,12 @@ an earlier PPTX has already been built.
 
 
 For this fork, `init` defaults to `profile: paper` and eight slides. Read
-[paper-presentation.md](paper-presentation.md) and provide `paper-plan.json`.
-Authored plan content is part of the render/build input snapshot; changing it
-invalidates old evidence. Artifact-bound reader-review metadata is excluded
-from that source hash and is checked against the final PPTX separately. `audit-paper` checks an actual PPTX independently of rendering.
-General legacy tasks without `profile` retain their existing behavior.
+[paper-presentation.md](paper-presentation.md). `paper-plan.json` is an optional
+outline/source map, not a second copy of every slide. `audit-paper` reads the
+actual PPTX and compares any declared title/body text. Editing planning notes
+alone does not invalidate renders; edits to HTML and render resources do.
+`finalize` reruns the audit with the current plan, when present. The normal
+exported-deck review records visual and reader-review findings together.
+Older contact-sheet-only deck reviews need a fresh `review-deck` run so every
+full-size page is included. General legacy tasks without `profile` retain their
+authoring workflow.

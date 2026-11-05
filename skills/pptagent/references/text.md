@@ -5,7 +5,9 @@ Set `mode: text`, configure an OpenAI-compatible chat completions endpoint in
 The CLI reads the skill's `.env`; `--env` and `--config` override those paths.
 
 `review-slides` sends the current slide renders to the visual model;
-`review-deck` sends contact sheets. Both validate the response and record the
+`review-deck` checks every full-size exported page, then contact sheets for
+sequence and consistency. A failing or unjudgeable page remains so even if
+the overview passes. Both validate the responses and record the
 same evidence used by host review. A response must include `verdict` (`pass`,
 `fail`, or `unjudgeable`), a nonempty `summary`, and an `issues` list. Each issue
 requires `severity` (`blocker`, `major`, `minor`), a positive `slide` number,
@@ -17,3 +19,8 @@ tools. Use those tools when present; otherwise run the matching CLI commands.
 
 Follow the normal authoring and delivery workflow. A missing key or failed
 visual call is a failed review, never an implicit pass.
+
+The visual model reviews visible slides, not the source paper. Check the
+explanation against the paper separately and include useful findings in the
+final review notes. Exported images use LibreOffice; inspect another target
+application when available instead of inferring its compatibility.

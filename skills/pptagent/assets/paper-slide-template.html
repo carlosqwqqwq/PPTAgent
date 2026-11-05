@@ -13,7 +13,7 @@
     body {
       background: #ffffff;
       color: #182231;
-      font-family: Arial, sans-serif;
+      font-family: {{FONT_FAMILY}};
     }
     .slide {
       width: {{WIDTH}}px;
@@ -21,34 +21,51 @@
       padding: 48px;
       overflow: hidden;
     }
-    .kicker {
-      margin: 0 0 16px;
-      color: #234f79;
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
     h1 {
-      margin: 0 0 24px;
+      margin: 0;
       font-size: 36px;
       color: #234f79;
+      line-height: 1.2;
+    }
+    .title-rule {
+      height: 4px;
+      margin: 16px 0 28px;
       border-bottom: 4px double #234f79;
-      padding-bottom: 16px;
-      line-height: 1.12;
     }
-    .message {
-      max-width: 900px;
-      margin: 0;
-      font-size: 22px;
-      line-height: 1.45;
-    }
+    .content { display: block; }
+    .explanation { max-width: 1040px; }
+    .figure { margin-top: 24px; min-width: 0; }
+    .figure img { display: block; width: 100%; height: auto; }
+    h2 { margin: 0 0 16px; font-size: 26px; line-height: 1.25; }
+    p { margin: 0 0 18px; font-size: 22px; line-height: 1.45; }
+    .caption { margin-top: 14px; font-size: 16px; line-height: 1.35; }
+    /* Optional layouts: use the space the explanation needs. */
+    .figure-led .content { display: flex; gap: 36px; align-items: flex-start; }
+    .figure-led .explanation { flex: 0.65; min-width: 0; }
+    .figure-led .figure { flex: 1.7; margin-top: 0; }
+    .synthesis .content { display: block; }
+    .synthesis .explanation { max-width: 1040px; }
   </style>
 </head>
 <body>
+  <!-- Generic paper starter. Apply the supplied template's typography and styling.
+       Add a figure where useful; figure-led is an optional side-by-side layout. -->
   <main class="slide">
-
     <h1>Replace with a clear explanatory page title</h1>
-    <p class="message">Choose the explanation, figure, or synthesis layout that helps a first-time reader.</p>
+    <div class="title-rule" aria-hidden="true"></div>
+    <div class="content">
+      <div class="explanation">
+        <h2>Explain the idea</h2>
+        <p>Introduce the problem or mechanism before interpreting the evidence.</p>
+        <p>State what the reader should learn from this page.</p>
+      </div>
+      <!-- Optional figure after the explanation:
+      <div class="figure">
+        <img src="../assets/figure.png" alt="Describe the relevant visual evidence">
+        <p class="caption">Explain what to inspect and what the observation means.</p>
+      </div>
+      -->
+    </div>
   </main>
 </body>
 </html>

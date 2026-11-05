@@ -61,7 +61,7 @@ def create_server(
 
     @server.tool()
     async def review_deck() -> dict[str, Any]:
-        """Render and review the exported answer.pptx contact sheets."""
+        """Review every exported page at full size, then the deck's overall flow."""
         return await run_review("review-deck")
 
     return server

@@ -120,6 +120,8 @@ def init_workspace(args: argparse.Namespace) -> dict[str, Any]:
     }
     if args.page_budget_reason:
         task["page_budget_reason"] = args.page_budget_reason
+    if args.font_family:
+        task["font_family"] = args.font_family
     task_path.write_text(
         json.dumps(task, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
@@ -171,22 +173,54 @@ def review_deck(config: dict[str, Any], workspace: Path) -> dict[str, Any]:
             **rendered,
             "review_mode": "host",
             "instruction": (
-                "Inspect all contact sheets with the host image viewer, then call "
-                "record-deck-review."
+                "Inspect every full-size page for text, figures, formulas, and layout. "
+                "Use contact sheets for sequence and consistency. For a paper deck, "
+                "first restate the argument from the slides alone, then verify it "
+                "against the source. Record findings with record-deck-review. "
+                "These renders use LibreOffice; check the target application separately."
             ),
         }
-    images = [workspace / value for value in rendered["contact_sheets"]]
-    report = review_images(
+    page_reports = []
+    for number, page in enumerate(rendered["pages"], 1):
+        report = review_images(
+            config,
+            [workspace / page],
+            f"Review exported slide {number} of {len(rendered['pages'])} at full size. "
+            "Check text wrapping, clipping, formulas, figure labels and legends, "
+            "overlap, and whether the visible explanation is understandable. "
+            f"Use slide number {number} in issues. Source accuracy is checked by the author.",
+        )
+        for issue in report["issues"]:
+            issue["slide"] = number
+        page_reports.append(report)
+    overview = review_images(
         config,
-        images,
-        "Review this complete presentation for consistency, narrative flow, "
-        "readability, clipping, overlap, and visual outliers. Identify slide numbers.",
+        [workspace / value for value in rendered["contact_sheets"]],
+        "Review the presentation's sequence, consistency, narrative flow, and visual "
+        "outliers. These contact sheets supplement full-size page reviews; do not "
+        "judge small labels from thumbnails. Identify slide numbers.",
+    )
+    reports = page_reports + [overview]
+    verdicts = {report["verdict"] for report in reports}
+    verdict = (
+        "fail"
+        if "fail" in verdicts
+        else "unjudgeable"
+        if "unjudgeable" in verdicts
+        else "pass"
+    )
+    summary = "\n".join(
+        [
+            f"Slide {number}: {report['summary']}"
+            for number, report in enumerate(page_reports, 1)
+        ]
+        + [f"Overview: {overview['summary']}"]
     )
     record = core.record_deck_review(
         workspace,
-        report["verdict"],
-        report["summary"],
-        report["issues"],
+        verdict,
+        summary,
+        [issue for report in reports for issue in report["issues"]],
         "external-visual",
     )
     return {
@@ -219,6 +253,7 @@ def make_parser() -> argparse.ArgumentParser:
     init.add_argument("--page-budget-reason", default="")
     init.add_argument("--aspect-ratio", choices=tuple(core.ASPECTS), default="16:9")
     init.add_argument("--language", default="zh")
+    init.add_argument("--font-family", help="Primary font family for the paper starter")
     init.add_argument("--force", action="store_true")
     audit = sub.add_parser("audit-paper")
     audit.add_argument("--workspace", type=Path, default=Path.cwd())
@@ -277,9 +312,19 @@ def main() -> None:
                 "host",
             )
         elif args.command == "audit-paper":
-            task = core.load_task(workspace) if (workspace / "task.json").is_file() else {}
-            result = paper.audit(args.plan or workspace / "paper-plan.json", args.pptx or workspace / "answer.pptx", task.get("page_budget_reason", ""))
-            (workspace / "paper-audit.json").write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            task = (
+                core.load_task(workspace) if (workspace / "task.json").is_file() else {}
+            )
+            plan_path = args.plan or workspace / "paper-plan.json"
+            result = paper.audit(
+                plan_path if args.plan or plan_path.is_file() else None,
+                args.pptx or workspace / "answer.pptx",
+                task.get("page_budget_reason", ""),
+            )
+            (workspace / "paper-audit.json").write_text(
+                json.dumps(result, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
         elif args.command == "finalize":
             result = core.finalize(workspace, config)
         else:

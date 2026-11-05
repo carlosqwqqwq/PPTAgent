@@ -1,4 +1,5 @@
-"""Deterministic paper-deck checks; visual review remains a separate gate."""
+"""Extract paper-deck structure and compare optional planning notes."""
+
 from __future__ import annotations
 
 import hashlib
@@ -15,9 +16,14 @@ NS = {
     "p": "http://schemas.openxmlformats.org/presentationml/2006/main",
     "a": "http://schemas.openxmlformats.org/drawingml/2006/main",
 }
-UNITS = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]|[A-Za-z0-9]+(?:[.'’_-][A-Za-z0-9]+)*")
+UNITS = re.compile(
+    r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]|[A-Za-z0-9]+(?:[.'’_-][A-Za-z0-9]+)*"
+)
 LABEL = r"(?:fig(?:ure)?\.?|图|p(?:age)?\.?|页|slide)\s*\d+(?:\s*[-–,]\s*\d+)*"
-FOOTER = re.compile(rf"(?:source\s*[:：]\s*|来源\s*[:：]\s*)?{LABEL}(?:\s*[·|;/,]?\s*{LABEL})*", re.IGNORECASE)
+FOOTER = re.compile(
+    rf"(?:source\s*[:：]\s*|来源\s*[:：]\s*)?{LABEL}(?:\s*[·|;/,]?\s*{LABEL})*",
+    re.IGNORECASE,
+)
 
 
 def text_units(text: str) -> int:
@@ -42,43 +48,66 @@ def _slides(path: Path) -> tuple[list[dict[str, Any]], int, int]:
         width, height = int(size.attrib["cx"]), int(size.attrib["cy"])
         relationships = ET.fromstring(archive.read("ppt/_rels/presentation.xml.rels"))
         targets = {rel.attrib["Id"]: rel.attrib["Target"] for rel in relationships}
-        relation_ns = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"
-        names = [posixpath.normpath(posixpath.join("ppt", targets[item.attrib[relation_ns]])) for item in presentation.findall("p:sldIdLst/p:sldId", NS)]
+        relation_ns = (
+            "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"
+        )
+        names = [
+            posixpath.normpath(posixpath.join("ppt", targets[item.attrib[relation_ns]]))
+            for item in presentation.findall("p:sldIdLst/p:sldId", NS)
+        ]
         names = [name.lstrip("/") for name in names]
         slides = []
         for name in names:
             root = ET.fromstring(archive.read(name))
             shapes = []
             for shape in root.findall(".//p:sp", NS):
-                paragraphs = ["".join(t.text or "" for t in p.findall(".//a:t", NS)) for p in shape.findall(".//a:p", NS)]
+                paragraphs = [
+                    "".join(t.text or "" for t in p.findall(".//a:t", NS))
+                    for p in shape.findall(".//a:p", NS)
+                ]
                 text = "\n".join(paragraphs)
                 offset = shape.find("p:spPr/a:xfrm/a:off", NS)
-                shapes.append({"text": text, "x": int(offset.attrib["x"]) if offset is not None else None, "y": int(offset.attrib["y"]) if offset is not None else None})
-            # Tables have visible text outside p:sp.
-            full_text = "\n".join("".join(t.text or "" for t in p.findall(".//a:t", NS)) for p in root.findall(".//a:p", NS))
-            table_texts = ["".join(t.text or "" for t in p.findall(".//a:t", NS)) for p in root.findall(".//p:graphicFrame//a:p", NS)]
-            slides.append({"shapes": shapes, "text": full_text, "table_texts": table_texts})
+                shapes.append(
+                    {
+                        "text": text,
+                        "x": int(offset.attrib["x"]) if offset is not None else None,
+                        "y": int(offset.attrib["y"]) if offset is not None else None,
+                    }
+                )
+            # Tables store text outside p:sp. XML presence does not establish visibility.
+            full_text = "\n".join(
+                "".join(t.text or "" for t in p.findall(".//a:t", NS))
+                for p in root.findall(".//a:p", NS)
+            )
+            table_texts = [
+                "".join(t.text or "" for t in p.findall(".//a:t", NS))
+                for p in root.findall(".//p:graphicFrame//a:p", NS)
+            ]
+            slides.append(
+                {
+                    "shapes": shapes,
+                    "text": full_text,
+                    "table_texts": table_texts,
+                    "picture_count": len(root.findall(".//p:pic", NS)),
+                }
+            )
     return slides, width, height
-
-
-
-def plan_source_digest(path: Path) -> str:
-    """Hash authored inputs, excluding artifact-bound review evidence."""
-    plan = json.loads(path.read_text(encoding="utf-8"))
-    plan.pop("reader_review", None)
-    encoded = json.dumps(plan, ensure_ascii=False, sort_keys=True).encode("utf-8")
-    return hashlib.sha256(encoded).hexdigest()
 
 
 def _check_body(actual: dict[str, Any], title: str, body: list[str]) -> bool:
     remaining = [
-        compact(shape["text"]) for shape in actual["shapes"]
+        compact(shape["text"])
+        for shape in actual["shapes"]
         if compact(shape["text"]) != title
     ]
     remaining.extend(compact(text) for text in actual["table_texts"])
     for declared in sorted((compact(text) for text in body), key=len, reverse=True):
         match = next(
-            (i for i, region in enumerate(remaining) if declared and declared in region),
+            (
+                i
+                for i, region in enumerate(remaining)
+                if declared and declared in region
+            ),
             None,
         )
         if match is None:
@@ -89,6 +118,7 @@ def _check_body(actual: dict[str, Any], title: str, body: list[str]) -> bool:
 
 def _reader_review(plan: dict[str, Any], artifact_hash: str) -> dict[str, Any]:
     review = plan.get("reader_review") or {}
+
     def nonempty_text(value: Any) -> bool:
         return isinstance(value, str) and bool(value.strip())
 
@@ -114,8 +144,10 @@ def _reader_review(plan: dict[str, Any], artifact_hash: str) -> dict[str, Any]:
     }
 
 
-def audit(plan_path: Path, pptx_path: Path, page_budget_reason: str = "") -> dict[str, Any]:
-    plan = json.loads(plan_path.read_text(encoding="utf-8"))
+def audit(
+    plan_path: Path | None, pptx_path: Path, page_budget_reason: str = ""
+) -> dict[str, Any]:
+    plan = json.loads(plan_path.read_text(encoding="utf-8")) if plan_path else {}
     slides, width, height = _slides(pptx_path)
     planned = plan.get("slides", [])
     sections = plan.get("sections", [])
@@ -128,12 +160,10 @@ def audit(plan_path: Path, pptx_path: Path, page_budget_reason: str = "") -> dic
         raise ValueError("key topics must have unique IDs")
     issues: list[str] = []
     warnings: list[str] = []
-    if not plan.get("template_used"):
-        warnings.append("Record and visually verify the institutional template used.")
-    if len(slides) != len(planned):
+    if "slides" in plan and len(slides) != len(planned):
         issues.append(f"Plan has {len(planned)} slides; PPTX has {len(slides)}.")
-    target = int(plan.get("max_slides", 10))
-    if len(slides) > target:
+    target = plan.get("max_slides")
+    if target is not None and len(slides) > int(target):
         warnings.append(
             f"Deck has {len(slides)} slides; the planning target is {target}. "
             "Check whether the added pages support coverage or readability."
@@ -144,19 +174,30 @@ def audit(plan_path: Path, pptx_path: Path, page_budget_reason: str = "") -> dic
     covered: set[str] = set()
     measurements = []
     layouts = []
-    for number, (entry, actual) in enumerate(zip(planned, slides), 1):
+    for number, actual in enumerate(slides, 1):
+        entry = planned[number - 1] if number <= len(planned) else {}
         prefix = f"Slide {number}: "
         title = compact(entry.get("title", ""))
-        if not title or title not in {compact(shape["text"]) for shape in actual["shapes"]}:
+        if "title" in entry and (
+            not title
+            or title not in {compact(shape["text"]) for shape in actual["shapes"]}
+        ):
             issues.append(prefix + "declared title is not an actual PPTX text shape.")
         body = entry.get("body", [])
-        if not isinstance(body, list) or any(not isinstance(text, str) for text in body):
-            raise TypeError(prefix + "body must be a list of visible explanatory paragraphs")
+        if not isinstance(body, list) or any(
+            not isinstance(text, str) for text in body
+        ):
+            raise TypeError(prefix + "body must be a list of declared text paragraphs")
         if not _check_body(actual, title, body):
-            issues.append(prefix + "declared body text is absent or reuses an already-counted span.")
+            issues.append(
+                prefix
+                + "declared body text is absent or reuses an already-counted span."
+            )
         unknown_sources = set(entry.get("section_ids", [])) - section_ids
         if sections and unknown_sources:
-            warnings.append(prefix + f"source map has unknown sections: {sorted(unknown_sources)}.")
+            warnings.append(
+                prefix + f"source map has unknown sections: {sorted(unknown_sources)}."
+            )
         declared_topics = set(entry.get("topic_ids", []))
         covered.update(declared_topics)
         if topics and declared_topics - topic_ids:
@@ -165,44 +206,75 @@ def audit(plan_path: Path, pptx_path: Path, page_budget_reason: str = "") -> dic
         if stage in stage_ranks:
             rank = stage_ranks[stage]
             if rank < last_stage:
-                warnings.append(prefix + "returns to an earlier narrative stage; review the transition.")
+                warnings.append(
+                    prefix
+                    + "returns to an earlier narrative stage; review the transition."
+                )
             last_stage = rank
         elif stage and narrative_order:
-            warnings.append(prefix + f"narrative stage {stage!r} is not in the outline.")
+            warnings.append(
+                prefix + f"narrative stage {stage!r} is not in the outline."
+            )
         units = sum(text_units(text) for text in body)
         baseline = entry.get("baseline_body_units")
         comparable = (
-            isinstance(baseline, (int, float)) and not isinstance(baseline, bool)
-            and math.isfinite(baseline) and baseline > 0
+            isinstance(baseline, (int, float))
+            and not isinstance(baseline, bool)
+            and math.isfinite(baseline)
+            and baseline > 0
         )
         ratio = units / baseline if comparable else None
-        if comparable and not (plan.get("baseline_source") and entry.get("baseline_mapping")):
-            warnings.append(prefix + "density comparison lacks a documented comparable baseline.")
+        if comparable and not (
+            plan.get("baseline_source") and entry.get("baseline_mapping")
+        ):
+            warnings.append(
+                prefix + "density comparison lacks a documented comparable baseline."
+            )
         for shape in actual["shapes"]:
             x, y, text = shape["x"], shape["y"], shape["text"]
-            if x is not None and y is not None and x < width * .5 and y >= height * .82:
-                if FOOTER.fullmatch(text.strip()) or re.fullmatch(r"\s*\d+(?:\s*/\s*\d+)?\s*", text):
-                    issues.append(prefix + f"remove lower-left figure/page label: {text!r}.")
+            if (
+                x is not None
+                and y is not None
+                and x < width * 0.5
+                and y >= height * 0.82
+            ):
+                if FOOTER.fullmatch(text.strip()) or re.fullmatch(
+                    r"\s*\d+(?:\s*/\s*\d+)?\s*", text
+                ):
+                    warnings.append(
+                        prefix
+                        + f"possible lower-left figure/page label: {text!r}; inspect before removing, since this may be a chart label."
+                    )
         if entry.get("layout"):
             layouts.append(entry["layout"])
-        measurements.append({
-            "slide": number,
-            "title": entry.get("title"),
-            "body_units": units,
-            "baseline_body_units": baseline,
-            "density_ratio": round(ratio, 4) if ratio is not None else None,
-            "density_is_advisory": True,
-            "topic_ids": sorted(declared_topics),
-            "narrative_stage": stage,
-            "layout": entry.get("layout"),
-        })
+        measurements.append(
+            {
+                "slide": number,
+                "title": entry.get("title"),
+                "body_units": units,
+                "declared_body_units": units,
+                "extracted_text_units": text_units(actual["text"]),
+                "extracted_text": actual["text"],
+                "declared_figure_ids": entry.get("figure_ids", []),
+                "picture_objects": actual["picture_count"],
+                "visibility_verified": False,
+                "baseline_body_units": baseline,
+                "density_ratio": round(ratio, 4) if ratio is not None else None,
+                "density_is_advisory": True,
+                "topic_ids": sorted(declared_topics),
+                "narrative_stage": stage,
+                "layout": entry.get("layout"),
+            }
+        )
     missing = sorted(topic_ids - covered)
     if missing:
-        warnings.append(f"Key topics have no declared slide mapping: {missing}. Check coverage manually.")
-    if not topics:
-        warnings.append("Record the paper's essential topics and review their coverage manually.")
+        warnings.append(
+            f"Key topics have no declared slide mapping: {missing}. Check coverage manually."
+        )
     if len(layouts) >= 3 and len(set(layouts)) == 1:
-        warnings.append("All recorded layouts are identical; review whether different content needs a different arrangement.")
+        warnings.append(
+            "All recorded layouts are identical; review whether different content needs a different arrangement."
+        )
     experimental = sum(bool(entry.get("experimental")) for entry in planned)
     budget = plan.get("experiment_page_budget")
     if budget is not None and experimental > int(budget):
@@ -212,22 +284,28 @@ def audit(plan_path: Path, pptx_path: Path, page_budget_reason: str = "") -> dic
         )
     artifact_hash = _digest(pptx_path)
     reader_review = _reader_review(plan, artifact_hash)
-    if not reader_review["current"]:
-        warnings.append("Record a first-time-reader review tied to the final PPTX hash.")
+    if plan.get("reader_review") and not reader_review["current"]:
+        warnings.append(
+            "The optional reader-review notes do not refer to the current PPTX."
+        )
     if reader_review["recorded"] and not reader_review["resolved"]:
         warnings.append("The reader-review record still lists unresolved issues.")
     return {
         "ok": not issues,
-        "schema_version": "pptagent.paper.audit.v2",
-        "scope": "Deterministic artifact checks; no automatic comprehension judgment",
+        "schema_version": "pptagent.paper.audit.v3",
+        "scope": "Extracted PPTX structure and optional plan comparisons; XML text, picture objects, and figure IDs do not establish visibility, comprehension, or source accuracy",
         "artifact_sha256": artifact_hash,
-        "plan_sha256": _digest(plan_path),
+        "plan_sha256": _digest(plan_path) if plan_path else None,
         "slides": len(slides),
         "experimental_slides": experimental,
         "measurements": measurements,
         "issues": issues,
         "warnings": warnings,
-        "coverage": {"declared_topic_ids": sorted(covered), "unmapped_topic_ids": missing, "verified_semantically": False},
+        "coverage": {
+            "declared_topic_ids": sorted(covered),
+            "unmapped_topic_ids": missing,
+            "verified_semantically": False,
+        },
         "reader_review": reader_review,
         "page_budget_reason": plan.get("page_budget_reason") or page_budget_reason,
         "manual_checks": [
