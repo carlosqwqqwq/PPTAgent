@@ -20,7 +20,6 @@ tools. Use those tools when present; otherwise run the matching CLI commands.
 Follow the normal authoring and delivery workflow. A missing key or failed
 visual call is a failed review, never an implicit pass.
 
-The visual model reviews visible slides, not the source paper. Check the
-explanation against the paper separately and include useful findings in the
-final review notes. Exported images use LibreOffice; inspect another target
-application when available instead of inferring its compatibility.
+The visual model reviews the slides; the author checks the explanation against
+the paper. Combine useful findings in the normal deck-review notes. Follow
+[task-contract.md](task-contract.md) for fonts and target-software review.

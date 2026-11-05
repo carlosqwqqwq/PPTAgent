@@ -5,9 +5,9 @@ description: Create and revise editable PowerPoint presentations from a brief us
 
 # PPTAgent
 
-Use the host agent to research and author slides. The CLI handles rendering,
-editable conversion, and verification that the delivered PPTX matches the
-reviewed sources. Do not start another authoring agent.
+Keep research and slide authoring in the host agent. The CLI handles
+rendering, editable conversion, and verification that the delivered PPTX
+matches the reviewed sources.
 
 ## Setup
 
@@ -28,20 +28,19 @@ live in `config.example.yaml`.
 
 ## Paper presentation profile
 
-New tasks use the paper profile, with an eight-to-ten-page planning target.
+New tasks use the paper profile. Follow the user's page count; otherwise,
+start with eight to ten pages.
 Read [references/paper-presentation.md](references/paper-presentation.md).
 Extract the supplied template's typography, header, spacing, and palette;
-the bundled starter is generic and does not import a PPTX template.
-Explain the problem and motivation, then the mechanism in execution order,
-then the evidence and limits. Allocate space to the reasoning rather than
-repeat a fixed layout. Keep quantitative claims interpretable and give figures
-a reading entry point. Text counts and page budgets are planning aids.
+adapt the generic starter to it and keep a white or transparent background.
+Explain the problem, the mechanism's causal steps, and what the evidence shows.
+Use page space for useful explanations, worked examples, and readable figures.
+Keep essential conditions concise and next to the point they qualify.
 
 Review every full-size exported page. First restate the argument without the
 paper, then check it against the source. Put useful findings and fixes in the
-normal deck-review record. Check fonts and the intended presentation software
-when available; the CLI's LibreOffice renders do not establish another app's
-compatibility. Keep private templates and source assets outside the repo, and
+normal deck-review record. Follow the task contract for fonts and target
+software. Keep private templates and source assets outside the repo, and
 omit added lower-left figure/page labels. Use `--profile general` for a
 non-paper presentation.
 
@@ -52,8 +51,8 @@ non-paper presentation.
   `--profile paper|general`, `--aspect-ratio 16:9|4:3|A1`, `--language`, and
   `--font-family "Template Body Font"`. Existing tasks use `task.json`.
 - Use available research tools as needed and preserve sources for checkable
-  claims. A manuscript or asset manifest is useful for complex decks, not a
-  prerequisite for every edit.
+  claims. Use a manuscript or asset manifest when it helps organize a complex
+  deck.
 - Use `scaffold` if starter HTML is useful; it preserves existing slides.
   Author exactly the requested page count and replace the starter text.
 - Run `review-slides`, inspect every returned image, then record each result:
@@ -67,15 +66,14 @@ non-paper presentation.
   with `--verdict` and `--summary`. Text mode combines full-page and overview
   visual results automatically; the author still verifies source accuracy.
 - Fix issues that affect the user's requirements or visible quality. Source
-  changes require fresh renders, reviews, and a build. Shared resource changes
-  invalidate all slide reviews. Rendering alone does not establish a pass.
+  changes require fresh renders, reviews, and a build. After shared-resource
+  changes, review all slides again.
 - Run `finalize`. Deliver `answer.pptx` only when `complete=true`. If the user
   explicitly accepts an incomplete draft, set `delivery.mode: best-effort`;
   `delivery_ready=true` then permits delivery with the failed checks disclosed.
 
 Commands take `--workspace` with an absolute path and emit JSON. Use `--help`
 for arguments. A successful delivery includes a current `final-report.json`.
-`complete` describes the recorded workflow, not an automatic judgment of
-comprehension or target-application compatibility. Keep API keys in environment
+`complete` describes the recorded workflow. Keep API keys in environment
 variables or the skill's `.env`, outside artifacts.
 

@@ -23,7 +23,7 @@ All render dependencies must be local under `assets/` or `slides/`; use
 relative paths. Download remote images before authoring. Ordinary hyperlinks
 may point to websites. CSS and scripts can be inline. Shared resources are
 hashed together, so changing any of them invalidates all slide reviews.
-Do not edit the CLI-managed evidence files to bypass review.
+Let the CLI manage the render and review evidence.
 
 The converter supports static HTML/CSS. The body must resolve to the requested
 pixel dimensions in its default 1280x720 browser viewport; explicit dimensions
@@ -33,27 +33,28 @@ text element's content on one source line, since export can preserve newlines
 that a browser collapses. The scaffold demonstrates these constraints.
 
 Give positioned text containers an explicit width with spare room, especially
-for mixed Chinese/Latin headings. Font metrics can differ after PPTX export;
-a tightly fitted browser heading can wrap and overlap the next element.
-Check the exported deck as well as the HTML renders. Verify that the chosen
-fonts support the deck's languages and symbols and are available in the
-rendering environment and intended presentation software. Where the target
-software is available, inspect the final PPTX there for substitution, wrapping,
-clipping, alignment, and formula rendering. Record which software was checked;
-if the target is unavailable, disclose that limit instead of treating another
-renderer as proof of compatibility. Recheck affected pages after changes.
+for mixed Chinese/Latin headings. Preserve template fonts when installed and
+supporting the deck's languages and symbols. Otherwise, choose an available
+substitute with suitable glyphs and similar style. The starter includes CJK
+fallbacks; check the actual font selected by the renderer.
+
+Inspect the exported deck as well as the HTML previews. CLI page images use
+LibreOffice. When the intended software, such as PowerPoint or WPS, is
+available, open the final PPTX there and inspect font substitution, wrapping,
+clipping, alignment, formulas, and figures. Record the software inspected and
+any unavailable target in the normal review summary. Recheck affected pages
+after font or export changes.
 
 Research notes and a manuscript are optional working aids. Keep provenance for
-externally checkable claims and reused assets in an appropriate form; no fixed
-notes schema is required. Revise existing content when the user asks, even if
-an earlier PPTX has already been built.
+externally checkable claims and reused assets in a form suited to the task.
+Revise existing content when the user asks, including after an earlier build.
 
 
 For this fork, `init` defaults to `profile: paper` and eight slides. Read
 [paper-presentation.md](paper-presentation.md). `paper-plan.json` is an optional
-outline/source map, not a second copy of every slide. `audit-paper` reads the
-actual PPTX and compares any declared title/body text. Editing planning notes
-alone does not invalidate renders; edits to HTML and render resources do.
+outline/source map. `audit-paper` reads the actual PPTX and compares any
+declared title/body text. Planning-note edits preserve unchanged renders;
+edits to HTML and render resources use fresh exports and reviews.
 `finalize` reruns the audit with the current plan, when present. The normal
 exported-deck review records visual and reader-review findings together.
 Older contact-sheet-only deck reviews need a fresh `review-deck` run so every

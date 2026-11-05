@@ -457,19 +457,18 @@ Existing tasks created with the earlier standalone scripts need fresh renders, r
 
 ## Academic paper defaults in this fork
 
-New tasks use a reader-centered paper profile with an eight-to-ten-slide
-planning target. Read the [paper presentation contract](references/paper-presentation.md)
-for background and motivation, synthesis, key-topic coverage, flexible layouts,
-readable evidence, white backgrounds, and private template handling.
-The generic starter supports a template-derived `--font-family` with explicit
-CJK fallbacks. It does not import the institutional template itself.
+New tasks use a reader-centered paper profile. Follow the requested page count;
+otherwise, start with eight to ten slides. Read the
+[paper presentation guide](references/paper-presentation.md) for causal
+explanations, useful examples, meaningful comparisons, and readable figures.
+Adapt the generic starter to the supplied template, keeping a white or
+transparent background. `--font-family` sets its body font with CJK fallbacks.
 `review-deck` checks every full-size exported page and then the overview;
 reader review and source checking use the same final review notes.
 `audit-paper` extracts actual PPTX text and compares an optional `paper-plan.json`.
-Counts, figure IDs, and XML presence do not establish visibility or comprehension.
-The final report separates structure and visual-review evidence and identifies
-LibreOffice as the renderer, without inferring PowerPoint or WPS compatibility.
-Planning-note edits do not trigger a rebuild of unchanged slides.
+Use these comparisons as planning aids alongside the page review.
+See [task-contract.md](references/task-contract.md) for fonts, target software,
+and private workspace files. Planning-note edits preserve unchanged renders.
 Existing tasks without a profile retain their general workflow;
 `--profile general` opts out.
 
