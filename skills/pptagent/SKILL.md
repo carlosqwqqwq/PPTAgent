@@ -33,10 +33,10 @@ start with eight to ten pages.
 Read [references/paper-presentation.md](references/paper-presentation.md).
 Extract the supplied template's typography, header, spacing, and palette;
 adapt the generic starter to it and keep a white or transparent background.
-Explain the problem, the mechanism's causal steps, and what the evidence shows.
-Use page space for explanations that connect the visuals to their meaning,
-worked examples, and readable figures.
-Keep essential conditions concise and next to the point they qualify.
+Explain the research problem, how the method works, and what the experiments
+show. Use examples to explain difficult steps and describe what readers should
+learn from each figure. State important conditions alongside the result or
+operation they apply to.
 
 Review every full-size exported page. First restate the argument without the
 paper, then check it against the source. Put useful findings and fixes in the

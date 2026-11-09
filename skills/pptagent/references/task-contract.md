@@ -35,11 +35,11 @@ that a browser collapses. The scaffold demonstrates these constraints.
 Give positioned text containers an explicit width with spare room, especially
 for mixed Chinese/Latin headings. Preserve template fonts when installed and
 supporting the deck's languages and symbols. Otherwise, choose an available
-substitute with suitable glyphs and similar style. When the user specifies
-separate Chinese and Latin fonts, apply each through text styles or spans;
-a fallback stack selects available glyphs rather than assigning fonts by
-language. The starter includes CJK fallbacks; check the actual font selected
-by the renderer.
+substitute with suitable glyphs and similar style. If the user requests
+different fonts for Chinese and Latin text, assign them to the corresponding
+text spans. A CSS font stack uses the first font containing each glyph, so
+it may use the same font for both languages. Check which fonts the renderer
+actually uses, including the starter's CJK fallbacks.
 
 Inspect the exported deck as well as the HTML previews. CLI page images use
 LibreOffice. When the intended software, such as PowerPoint or WPS, is

@@ -13,71 +13,71 @@ starter to the supplied template. Use `init --font-family "Template Body Font"`
 to set its body font, and slide CSS for a distinct heading font. `scaffold`
 preserves existing slides.
 
-Read the whole paper before allocating pages. Identify the problem, why the
-existing approach is insufficient, the core mechanism, the evidence, and the
-limits. Introduce unfamiliar terms and symbols through concrete values or
-events. Explain what each key quantity measures and why the method uses it.
-Arrange the argument in the order the audience needs to understand it. Use
-descriptive titles and bring a later source figure forward when it explains
-the motivation better. Keep a private source map for claims and reused figures.
+Read the paper in full before outlining the slides. Identify the research
+problem, the limitations of existing approaches, how the proposed method
+works, and what the evaluation shows, including its limitations. Define
+unfamiliar terms and symbols when they first appear. Explain what important
+quantities measure and how the method uses them. Order the slides so readers have the context needed
+for each new idea. Use descriptive titles. A figure can appear earlier than
+in the paper if it helps explain the problem. Keep a private record of the
+sources for claims and figures.
 
 Follow the user's requested page count. Otherwise, start with about eight to
-ten slides and allocate space to the explanation. Give background and
-motivation enough room to make the method understandable. A difficult
-mechanism may need a worked example and a second page; related experiments
-can share a page when their labels remain readable.
+ten slides. Include enough background for readers to understand why the
+method is needed. A complex method may need a worked example on a separate
+slide. Related experiments can share a slide when the figures and labels
+remain readable.
 
 ## Explain what happens and why
 
-Follow a representative input through the method in execution order. Explain
-what is being processed, how the state changes, and what the output means.
-Use complete sentences in the slide body to explain why each operation is
-needed and how its result affects later steps. Place these connections beside
-the relevant visual.
+Trace a representative input through the method. Describe the data or state
+at each important step, the operation performed, and its effect on subsequent
+steps. Explain why the method needs that operation, with a short sentence
+beside the corresponding part of the figure. Describe the final output and
+what it represents. Keep these explanations in the slide body.
 
-For iterative methods, show how one round changes the state and affects the
-next round, including why information is refreshed or held fixed. For selection
-or sampling, walk through a concrete candidate, the quantities used to evaluate
-it, the decision rule, and the resulting state. Use a worked example or
-annotated sequence to make an abstract rule tangible. State essential
-conditions concisely beside the operation or conclusion they qualify.
+For an iterative method, show what changes after one round, what remains
+fixed, and how this affects the next round. Show which stored information is
+updated and explain why. For selection or sampling, work through an example:
+give the candidate's relevant values, apply the decision rule, and show the
+result. State important conditions alongside the operation or conclusion
+they apply to.
 
-Give each page a clear teaching point and shape the layout around it: a large
-annotated figure, a sequence with explanations, a compact comparison, or a
-text-led synthesis. Use prose and visual annotations to explain causes,
-meaning, or consequences beyond the figure's labels. On a thin page, develop
-a missing connection or useful example, or enlarge the figure the audience
-needs to read. On a crowded page, remove repetition while preserving the
-explanation needed to follow it. Keep whitespace that separates ideas and
-adjust text and figure sizes to the page's teaching point.
+Choose a layout that suits the material, such as an annotated diagram, a
+comparison, or a short explanation. Use text to explain relationships that
+are difficult to see in the figure. Add an example where a step or rule needs
+further explanation. Use spare room to enlarge figures with small labels or
+details. Remove repeated text from crowded slides, and leave enough space
+to distinguish separate ideas.
 
 ## Explain what the evidence means
 
-Make the question each experiment answers clear. Identify what was
-compared, the metric and unit, the baseline, and the setting or budget needed
-to interpret the result. Explain the meaningful difference and connect it to
-the method claim being tested. When metrics move in different directions,
-discuss what each measures and the interpretation supported by the paper.
-Give experiments with different budgets or purposes their own context and
-explain how their findings relate. For component studies, explain each
-component's role through the tested change or a concrete execution trace.
-For defect-finding results, use a concrete failure to show the expected
-behavior, the observed behavior, and which observation reveals the error.
-Use counts to establish the scale and pattern of the findings.
+State the question each experiment addresses. Introduce the baseline,
+metrics, units, and experimental conditions needed to interpret the results.
+Explain what the comparison shows about the proposed method. When metrics
+change in different directions, explain what each measures and use the
+paper's evidence to interpret the difference. When experiments have different
+budgets or purposes, state these before relating their findings.
 
-Label totals, per-run results, means, maxima, and distinct findings precisely.
-Include denominators, aggregation, and uncertainty where they affect the
-conclusion. Distinguish measured findings from presenter interpretation or
-proposed extensions when needed. State the finding directly and keep its
-relevant scope or limitation close to it.
+For an ablation, describe what changed between runs and how the results
+changed. For a case analysis, show what each component did in the example.
+A defect example should identify the expected and observed behavior, then
+show which output or state reveals the error. Report how many defects were
+found and describe the main types.
 
-Use original figures where they explain a point. Guide the audience to the
-relevant panel, axis, series, or comparison, then explain the pattern and its
-meaning. Connect unfamiliar figure labels to the terms used in the slide's
-prose. Preserve useful labels, axes, legends, code, and scientific
-color/line/marker meanings. Keep data and series mapping faithful in redraws
-and retain the context needed to interpret a crop. Record important omissions
-in the private source map.
+State whether a number is a total, a per-run result, an average, a maximum,
+or a count of distinct findings. Explain denominators, aggregation, and
+uncertainty when they affect the conclusion. Make clear which conclusions
+come from the paper and which are the presenter's analysis or proposals.
+State each finding directly, with any conditions needed to interpret it.
+
+Use original figures when they help explain the paper. Point readers to the
+relevant panel or comparison and explain what they should notice. Use the
+same terms in the text and figure, explaining unfamiliar labels where needed.
+Preserve labels, axes, legends, code, and the meaning of colors, lines, and
+markers. Redrawn figures should preserve the data and series mapping. Crops
+should retain the context needed to interpret the figure. Record important
+omissions in the private source map.
 
 Use dark text, clear hierarchy, and restrained template colors, without
 decorative cards or promotional slogans. Enlarge or reorganize figures until
