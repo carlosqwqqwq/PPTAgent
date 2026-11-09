@@ -15,12 +15,14 @@ preserves existing slides.
 
 Read the paper in full before outlining the slides. Identify the research
 problem, the limitations of existing approaches, how the proposed method
-works, and what the evaluation shows, including its limitations. Define
-unfamiliar terms and symbols when they first appear. Explain what important
-quantities measure and how the method uses them. Order the slides so readers have the context needed
-for each new idea. Use descriptive titles. A figure can appear earlier than
-in the paper if it helps explain the problem. Keep a private record of the
-sources for claims and figures.
+works, and what the evaluation shows. Define unfamiliar terms and symbols
+when they first appear. Explain what important
+quantities measure, how they are calculated, and how the method uses them.
+Put the definitions and conditions needed to follow the argument on the
+slides, using speaker notes for supporting detail. Order the slides so readers
+have the context needed for each new idea. Use descriptive titles. A figure
+can appear earlier than in the paper if it helps explain the problem. Keep a
+private record of the sources for claims and figures.
 
 Follow the user's requested page count. Otherwise, start with about eight to
 ten slides. Include enough background for readers to understand why the
@@ -28,27 +30,32 @@ method is needed. A complex method may need a worked example on a separate
 slide. Related experiments can share a slide when the figures and labels
 remain readable.
 
+Write in direct academic prose. Use complete sentences to explain what a
+component does and why it matters. Use familiar verbs and precise technical
+terms. State conditions with the claims they qualify. Remove filler
+introductions, repeated qualifications, and sentences that only announce
+what the slide will explain.
+
 ## Explain what happens and why
 
 Trace a representative input through the method. Describe the data or state
 at each important step, the operation performed, and its effect on subsequent
-steps. Explain why the method needs that operation, with a short sentence
-beside the corresponding part of the figure. Describe the final output and
-what it represents. Keep these explanations in the slide body.
+steps. Explain why the method needs that operation beside the corresponding
+part of the figure. Describe the final output and what it represents.
 
 For an iterative method, show what changes after one round, what remains
 fixed, and how this affects the next round. Show which stored information is
-updated and explain why. For selection or sampling, work through an example:
-give the candidate's relevant values, apply the decision rule, and show the
-result. State important conditions alongside the operation or conclusion
-they apply to.
+updated and explain why. For selection or sampling, work through a numerical
+example: state how candidates are chosen, show how the relevant scores or
+probabilities are calculated, and apply the decision rule.
 
 Choose a layout that suits the material, such as an annotated diagram, a
-comparison, or a short explanation. Use text to explain relationships that
-are difficult to see in the figure. Add an example where a step or rule needs
-further explanation. Use spare room to enlarge figures with small labels or
-details. Remove repeated text from crowded slides, and leave enough space
-to distinguish separate ideas.
+comparison, or a short explanation. Give explanations enough room: a short
+paragraph can be clearer than compressed labels. When a page feels sparse,
+add a missing reason, worked step, or interpretation of the evidence. If the
+explanation is already complete, enlarge figures whose details are hard to
+read or adjust the layout. Keep space between separate ideas. Remove repeated
+wording that does not help explain the page.
 
 ## Explain what the evidence means
 
@@ -59,17 +66,16 @@ change in different directions, explain what each measures and use the
 paper's evidence to interpret the difference. When experiments have different
 budgets or purposes, state these before relating their findings.
 
-For an ablation, describe what changed between runs and how the results
-changed. For a case analysis, show what each component did in the example.
-A defect example should identify the expected and observed behavior, then
-show which output or state reveals the error. Report how many defects were
-found and describe the main types.
+For an ablation, explain which component changes, what the baseline does in
+its place, and how the measured results change. For a case analysis, show
+what each component did in the example. A defect example should identify the
+expected and observed behavior, then show which output or state reveals the
+error. Report how many defects were found and describe the main types.
 
 State whether a number is a total, a per-run result, an average, a maximum,
 or a count of distinct findings. Explain denominators, aggregation, and
 uncertainty when they affect the conclusion. Make clear which conclusions
 come from the paper and which are the presenter's analysis or proposals.
-State each finding directly, with any conditions needed to interpret it.
 
 Use original figures when they help explain the paper. Point readers to the
 relevant panel or comparison and explain what they should notice. Use the
@@ -124,3 +130,4 @@ Planning-note edits preserve unchanged slide renders. `audit-paper` and
 changes use fresh exports and reviews. Existing `reader_review` notes remain
 optional; use the normal deck record for final findings. See
 `paper-plan.example.json` for a small example.
+
