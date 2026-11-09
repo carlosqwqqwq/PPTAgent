@@ -34,7 +34,8 @@ Read [references/paper-presentation.md](references/paper-presentation.md).
 Extract the supplied template's typography, header, spacing, and palette;
 adapt the generic starter to it and keep a white or transparent background.
 Explain the problem, the mechanism's causal steps, and what the evidence shows.
-Use page space for useful explanations, worked examples, and readable figures.
+Use page space for explanations that connect the visuals to their meaning,
+worked examples, and readable figures.
 Keep essential conditions concise and next to the point they qualify.
 
 Review every full-size exported page. First restate the argument without the
@@ -76,4 +77,3 @@ Commands take `--workspace` with an absolute path and emit JSON. Use `--help`
 for arguments. A successful delivery includes a current `final-report.json`.
 `complete` describes the recorded workflow. Keep API keys in environment
 variables or the skill's `.env`, outside artifacts.
-

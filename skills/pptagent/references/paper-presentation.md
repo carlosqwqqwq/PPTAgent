@@ -15,10 +15,11 @@ preserves existing slides.
 
 Read the whole paper before allocating pages. Identify the problem, why the
 existing approach is insufficient, the core mechanism, the evidence, and the
-limits. Introduce unfamiliar objects and terms before using them. Arrange the
-argument in the order the audience needs to understand it. Use descriptive
-titles and bring a later source figure forward when it explains the motivation
-better. Keep a private source map for claims and reused figures.
+limits. Introduce unfamiliar terms and symbols through concrete values or
+events. Explain what each key quantity measures and why the method uses it.
+Arrange the argument in the order the audience needs to understand it. Use
+descriptive titles and bring a later source figure forward when it explains
+the motivation better. Keep a private source map for claims and reused figures.
 
 Follow the user's requested page count. Otherwise, start with about eight to
 ten slides and allocate space to the explanation. Give background and
@@ -29,33 +30,40 @@ can share a page when their labels remain readable.
 ## Explain what happens and why
 
 Follow a representative input through the method in execution order. Explain
-what is being processed, how the state changes, why each operation helps, and
-what the output means. Connect the components with complete sentences that
-make the causal links clear. Keep the intermediate steps needed to understand
-the method in the slide body.
+what is being processed, how the state changes, and what the output means.
+Use complete sentences in the slide body to explain why each operation is
+needed and how its result affects later steps. Place these connections beside
+the relevant visual.
 
 For iterative methods, show how one round changes the state and affects the
-next round. For selection or sampling, walk through a concrete candidate,
-the quantities used to evaluate it, the decision rule, and the resulting state.
-Use a worked example or annotated sequence to make an abstract rule tangible.
-State essential conditions concisely beside the operation or conclusion they
-qualify.
+next round, including why information is refreshed or held fixed. For selection
+or sampling, walk through a concrete candidate, the quantities used to evaluate
+it, the decision rule, and the resulting state. Use a worked example or
+annotated sequence to make an abstract rule tangible. State essential
+conditions concisely beside the operation or conclusion they qualify.
 
 Give each page a clear teaching point and shape the layout around it: a large
 annotated figure, a sequence with explanations, a compact comparison, or a
-text-led synthesis. Use open space to explain a missing causal link, develop
-a useful example, or enlarge the figure the audience needs to read. Keep
-whitespace that separates ideas. When a page feels thin or difficult, rework
-its explanation and composition together. Choose the amount of text and the
-layout that make this particular point understandable.
+text-led synthesis. Use prose and visual annotations to explain causes,
+meaning, or consequences beyond the figure's labels. On a thin page, develop
+a missing connection or useful example, or enlarge the figure the audience
+needs to read. On a crowded page, remove repetition while preserving the
+explanation needed to follow it. Keep whitespace that separates ideas and
+adjust text and figure sizes to the page's teaching point.
 
 ## Explain what the evidence means
 
 Make the question each experiment answers clear. Identify what was
 compared, the metric and unit, the baseline, and the setting or budget needed
-to interpret the result. Explain the meaningful difference and what it shows
-about the method. For defect-finding results, lead with the important failure
-and its consequence, using counts as supporting evidence.
+to interpret the result. Explain the meaningful difference and connect it to
+the method claim being tested. When metrics move in different directions,
+discuss what each measures and the interpretation supported by the paper.
+Give experiments with different budgets or purposes their own context and
+explain how their findings relate. For component studies, explain each
+component's role through the tested change or a concrete execution trace.
+For defect-finding results, use a concrete failure to show the expected
+behavior, the observed behavior, and which observation reveals the error.
+Use counts to establish the scale and pattern of the findings.
 
 Label totals, per-run results, means, maxima, and distinct findings precisely.
 Include denominators, aggregation, and uncertainty where they affect the
@@ -65,7 +73,8 @@ relevant scope or limitation close to it.
 
 Use original figures where they explain a point. Guide the audience to the
 relevant panel, axis, series, or comparison, then explain the pattern and its
-meaning. Preserve useful labels, axes, legends, code, and scientific
+meaning. Connect unfamiliar figure labels to the terms used in the slide's
+prose. Preserve useful labels, axes, legends, code, and scientific
 color/line/marker meanings. Keep data and series mapping faithful in redraws
 and retain the context needed to interpret a crop. Record important omissions
 in the private source map.
